@@ -1,0 +1,29 @@
+{
+  "id": "/",
+  "name": "MRGMF · Zero Trust Fighter",
+  "short_name": "MRGMF",
+  "description": "Le portfolio jouable de Fodié Marega, End User Architect spécialisé IAM : gouvernance et architecture des identités (Microsoft Entra ID, accès conditionnel), automatisation cloud (PowerShell, Azure) et développement, façon borne d'arcade.",
+  "lang": "fr",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#07070f",
+  "theme_color": "#07070f",
+  "icons": [
+    {
+      "src": "/assets/img/favicon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any"
+    },
+    {
+      "src": "/assets/img/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/assets/img/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ]
+}

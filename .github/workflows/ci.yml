@@ -1,0 +1,21 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  site:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Build
+        run: npm run build
+      - name: Les pages versionnées sont à jour
+        run: git diff --exit-code -- index.html en/ 404.html sitemap.xml robots.txt site.webmanifest assets/img/favicon.svg
+      - name: Vérifications
+        run: node scripts/check.mjs
