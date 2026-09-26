@@ -119,7 +119,8 @@ function tailMatch(seq, pat, maxSkips = 2) {
 }
 
 function motionDone(dirs, at) {
-  const recent = collapse(buffer.filter((e) => at - e.t <= WINDOW).map((e) => e.n));
+  // Seules les directions entrées avant l'appui (et dans la fenêtre) comptent.
+  const recent = collapse(buffer.filter((e) => e.t <= at + 16 && at - e.t <= WINDOW).map((e) => e.n));
   if (/^(\d)\1$/.test(dirs)) {
     // Double tapotement (66, 22) : direction, neutre, direction.
     const d = Number(dirs[0]);
