@@ -79,10 +79,13 @@ await write(
   'site.webmanifest',
   JSON.stringify(
     {
+      id: '/',
       name: 'MRGMF · Zero Trust Fighter',
       short_name: 'MRGMF',
       description: fr.meta.description,
+      lang: 'fr',
       start_url: '/',
+      scope: '/',
       display: 'standalone',
       background_color: '#07070f',
       theme_color: '#07070f',

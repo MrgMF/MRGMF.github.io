@@ -364,7 +364,7 @@ function contactScreen(c, T) {
       <p class="lede">${esc(T(k.text))}</p>
       <p class="contact-mail"><a class="mail" href="#contact" data-mail data-u="${esc(k.email.user)}" data-d="${esc(k.email.domain)}">${esc(shown)}</a></p>
       <div class="contact-actions">
-        <a class="btn" href="#contact" data-mail-btn data-u="${esc(k.email.user)}" data-d="${esc(k.email.domain)}">${esc(k.emailLabel)}</a>
+        <a class="btn js-only" href="#contact" data-mail-btn data-u="${esc(k.email.user)}" data-d="${esc(k.email.domain)}">${esc(k.emailLabel)}</a>
         <button class="btn btn--ghost js-only" type="button" data-copy data-u="${esc(k.email.user)}" data-d="${esc(k.email.domain)}">${esc(T(k.copy))}</button>
         <a class="btn btn--ghost" href="${esc(k.linkedin)}" rel="noopener me">LinkedIn ${icon('ext')}</a>
         <a class="btn btn--ghost" href="${esc(k.github)}" rel="noopener me">GitHub ${icon('ext')}</a>

@@ -219,10 +219,11 @@ kbd {
 .px .idle-a {
   visibility: visible;
 }
-.breathe .idle-a {
+/* La respiration n'existe qu'en mode jeu : le mode lecture reste immobile. */
+[data-mode='game'] .breathe .idle-a {
   animation: frame-a 0.9s infinite;
 }
-.breathe .idle-b {
+[data-mode='game'] .breathe .idle-b {
   animation: frame-b 0.9s infinite;
 }
 @keyframes frame-a {
