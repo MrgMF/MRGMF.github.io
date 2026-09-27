@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; manifest-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; upgrade-insecure-requests">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LearnLink secure sign-in · Demo · MRGMF</title>
+<meta name="description" content="Interactive demo of LearnLink’s security mechanisms: TOTP two-factor authentication (RFC 6238), backup codes, adaptive CAPTCHA, lockout and SIEM log.">
+<link rel="canonical" href="https://mrgmf.github.io/en/demos/learnlink/">
+<link rel="alternate" hreflang="fr" href="https://mrgmf.github.io/demos/learnlink/">
+<link rel="alternate" hreflang="en" href="https://mrgmf.github.io/en/demos/learnlink/">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#07070f">
+<meta name="author" content="Fodié Marega">
+<link rel="icon" href="../../../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="../../../assets/fonts/chakra-petch-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../../../assets/css/demo.css">
+</head>
+<body class="demo-page demo-page--learnlink">
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="demo-bar">
+  <a class="demo-back" href="../../#vs-learnlink"><svg class="ico ico--left" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5 8 12l7 7"/></svg> Back to the portfolio</a>
+  <p class="demo-brand"><span class="demo-p1" aria-hidden="true">P1</span> MRGMF · Demo</p>
+  <a class="demo-lang" href="../../../demos/learnlink/" hreflang="fr" lang="fr">FR</a>
+</header>
+<main class="demo" id="main" tabindex="-1">
+  <header class="demo-head">
+    <p class="demo-kicker">Demo · LearnLink · MFA and anti brute-force</p>
+    <h1>LearnLink secure sign-in</h1>
+    <p class="demo-intro">LearnLink’s security mechanisms, rebuilt in the browser: turn on two-factor authentication (TOTP, RFC 6238), sign in, then try to brute-force the password and watch the CAPTCHA, the lockout and the security log react.</p>
+    <p class="demo-note"><svg class="ico ico--shield" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 19 6v5.5c0 4.2-2.9 7.6-7 9-4.1-1.4-7-4.8-7-9V6z"/><path d="m9 12 2.2 2.2L15.5 10"/></svg> Fictitious demo account. The TOTP secret is generated locally and disappears when you close the page.</p>
+  </header>
+  <p class="demo-nojs" data-nojs>This demo needs JavaScript to run. The rest of the portfolio stays readable without it.</p>
+  <div class="grid grid--2">
+    <div class="grid">
+      <section class="card" aria-labelledby="acc-h">
+        <h2 id="acc-h">1. Demo account</h2>
+        <p>A fictitious student account, so you can play both the attacker and the user.</p>
+        <dl class="creds">
+          <div><dt>Email address</dt><dd><code>demo@learnlink.test</code></dd></div>
+          <div><dt>Password</dt><dd><code>Apprendre-2026</code></dd></div>
+        </dl>
+        <p class="hint">The password is never stored in plain text. LearnLink uses bcrypt (12 rounds) server-side; here the browser applies PBKDF2 (Web Crypto, 100,000 iterations) for the same idea. Stored hash:</p>
+        <code class="secret" data-hash>…</code>
+      </section>
+      <section class="card" aria-labelledby="mfa-h">
+        <h2 id="mfa-h">2. Two-factor authentication</h2>
+        <p>An app-based second factor (Google Authenticator, Authy…): even with the password, the attacker stays out.</p>
+        <p class="actions"><button class="btn" type="button" data-enable-mfa>Turn on MFA</button></p>
+        <div data-mfa-panel hidden>
+          <p class="hint">Secret key (to type into an authenticator app):</p>
+          <code class="secret" data-secret></code>
+          <p class="hint">otpauth URI (normally shown as a QR code):</p>
+          <code class="secret" data-uri></code>
+          <h3>Simulated authenticator</h3>
+          <div class="authenticator" aria-live="off">
+            <span class="auth-ring" data-ring aria-hidden="true"></span>
+            <div>
+              <div class="auth-code" data-code>––– –––</div>
+              <div class="auth-meta" data-remaining></div>
+            </div>
+          </div>
+          <h3>Backup codes</h3>
+          <p class="hint">Single use, in case the phone gets lost.</p>
+          <ul class="backup" data-backup></ul>
+        </div>
+      </section>
+    </div>
+    <div class="grid">
+      <section class="card" aria-labelledby="login-h">
+        <h2 id="login-h">3. Sign in</h2>
+        <form data-login novalidate>
+          <div class="field"><label for="ll-email">Email address</label><input id="ll-email" type="email" autocomplete="off" value="demo@learnlink.test"></div>
+          <div class="field"><label for="ll-pass">Password</label><input id="ll-pass" type="password" autocomplete="off"></div>
+          <div class="field captcha" data-captcha hidden><label for="ll-captcha" data-captcha-q></label><input id="ll-captcha" type="text" inputmode="numeric" autocomplete="off"></div>
+          <div class="field" data-totp-field hidden><label for="ll-totp">6-digit code (or a backup code)</label><input id="ll-totp" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="9"></div>
+          <p class="actions"><button class="btn" type="submit" data-submit>Sign in</button> <button class="btn btn--ghost" type="button" data-bruteforce>Simulate an attack (5 tries)</button></p>
+        </form>
+        <p class="status" data-status role="status"></p>
+        <p class="meter-line" data-counters></p>
+        <div data-session hidden>
+          <p><strong data-welcome></strong></p>
+          <p class="actions"><button class="btn btn--ghost" type="button" data-logout>Sign out</button></p>
+        </div>
+      </section>
+      <section class="card" aria-labelledby="siem-h">
+        <h2 id="siem-h">Security log (SIEM)</h2>
+        <p class="hint">Every authentication event as normalised JSON: ready for Prometheus, Grafana or a SIEM.</p>
+        <pre class="log" data-log tabindex="0"></pre>
+        <p class="actions"><button class="btn btn--small btn--ghost" type="button" data-reset>Reset the demo</button></p>
+      </section>
+    </div>
+  </div>
+</main>
+<footer class="demo-foot">
+  <p>© 2026 Fodié Marega · <a href="../../#vs-learnlink">Back to the portfolio</a> · <a href="https://github.com/MrgMF/MRGMF.github.io/tree/main/assets/js/demos" rel="noopener">Demo source code</a></p>
+</footer>
+<script type="application/json" id="demo-i18n">{"enabled":"MFA on. The code changes every 30 seconds.","remaining":"Expires in {s}s","counters":"Consecutive failures: {n} · CAPTCHA from 3 · lockout at 10 · alert at 15","captchaQ":"Check: what is {a} + {b}?","ok":"Signed in.","welcome":"Signed in: {email} · Student role","loggedOut":"Signed out.","errors":{"credentials":"Wrong credentials.","captchaRequired":"Too many failures: answer the check first.","captchaFailed":"Wrong answer to the check.","totpRequired":"Enter the code from your authenticator app.","totpBad":"Invalid or expired code.","totpReplay":"This code was already used: wait for the next one.","locked":"Account locked for {s}s (15 min in production)."},"attack":"Simulated brute-force attack: {n} passwords tried.","alert":"Security alert: 15 failures on this account. The security team is notified.","backupUsed":"Backup code used: it will not work again."}</script>
+<script type="module" src="../../../assets/js/demos/learnlink.js"></script>
+</body>
+</html>

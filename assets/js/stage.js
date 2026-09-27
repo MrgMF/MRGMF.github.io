@@ -1,11 +1,17 @@
-// Combat d'un stage : chaque coup révèle un point fort du projet,
+// Combat d'une mission : chaque coup révèle un point fort du projet,
 // le dernier est le « super ». Barre de vie, combo, K.O., résultats.
+// Le contenu est découpé en onglets (Brief · Points forts · Résultat).
 
 import { sfx } from './audio.js';
-import { i18n, store, reducedMotion, pulseClass, banner, spark, announce } from './util.js';
+import { createTabs } from './tabs.js';
+import { i18n, store, reducedMotion, pulseClass, banner, spark, announce, isGame } from './util.js';
 
 const F = i18n.fight || {};
 const cleared = new Set((store.get('cleared', '') || '').split(',').filter(Boolean));
+
+// Le chrono descend d'une unité toutes les 3 secondes : ~5 minutes pour
+// lire tranquillement avant la fin du temps réglementaire.
+const TICK_MS = 3000;
 
 function markCleared(id) {
   cleared.add(id);
@@ -27,10 +33,12 @@ function createStage(el) {
   const arena = el.querySelector('.arena');
   const p1 = el.querySelector('.fighter--p1');
   const boss = el.querySelector('.fighter--boss');
+  const assist = el.querySelector('.fighter--assist');
   const layer = el.querySelector('[data-fx]');
   const timerEl = el.querySelector('[data-timer]');
   const attackBtn = el.querySelector('[data-attack]');
-  const results = el.querySelector('.results');
+  const countEl = el.querySelector('[data-hit-count]');
+  const tabs = createTabs(el);
   const idleHTML = commentary ? commentary.innerHTML : '';
 
   let n = 0;
@@ -38,11 +46,13 @@ function createStage(el) {
   let finishing = false;
   let time = 99;
   let timer = null;
+  let visited = false;
 
   function setHP() {
     const ratio = Math.max(0, 1 - n / total);
     hp?.style.setProperty('--hp', ratio.toFixed(3));
     if (hp) hp.toggleAttribute('data-low', ratio <= 0.3);
+    if (countEl) countEl.textContent = `${Math.min(n, total)}/${total}`;
   }
 
   function reveal(upTo) {
@@ -55,7 +65,6 @@ function createStage(el) {
     const name = h.querySelector('h4')?.textContent || '';
     const desc = h.querySelector('p')?.textContent || '';
     commentary.classList.toggle('is-super', isSuper);
-    commentary.innerHTML = '';
     const p = document.createElement('p');
     const t = document.createElement('span');
     t.className = 'commentary-tag';
@@ -67,7 +76,7 @@ function createStage(el) {
     d.className = 'commentary-desc';
     d.textContent = desc;
     p.append(t, nm, d);
-    commentary.append(p);
+    commentary.replaceChildren(p);
   }
 
   function impact(big) {
@@ -78,6 +87,7 @@ function createStage(el) {
     const y = b.top - a.top + b.height * 0.45 + (Math.random() * 30 - 15);
     spark(layer, x, y, big);
     pulseClass(p1, 'is-punching', 220);
+    if (assist && (big || n % 3 === 0)) pulseClass(assist, 'is-helping', 500);
     pulseClass(boss, 'is-hit', 300);
     if (!reducedMotion()) pulseClass(arena, big ? 'is-super' : 'is-shaking', big ? 700 : 260);
   }
@@ -91,7 +101,12 @@ function createStage(el) {
     setHP();
     impact(isSuper);
     if (combo) {
-      combo.innerHTML = `${n} ${n > 1 ? F.hits : F.hit}${move ? `<small>${F.special} ${moveName}</small>` : ''}`;
+      combo.textContent = `${n} ${n > 1 ? F.hits : F.hit}`;
+      if (move) {
+        const small = document.createElement('small');
+        small.textContent = `${F.special} ${moveName}`;
+        combo.append(small);
+      }
       pulseClass(combo, 'is-bump', 220);
     }
     const tag = isSuper ? F.super : move ? `${F.special} ${moveName}` : `Combo ${n}`;
@@ -109,28 +124,27 @@ function createStage(el) {
     sfx.ko();
     await banner(F.ko);
     await banner(F.perfect, true);
-    done = true;
     finishing = false;
-    clear(true);
+    clear();
   }
 
-  function clear(scroll) {
+  // Combat terminé (K.O. ou passé) : tout est révélé, on montre le résultat.
+  function clear() {
     done = true;
+    stopTimer();
     reveal(total);
     n = total;
     setHP();
     el.classList.add('is-ko', 'is-cleared');
     markCleared(id);
+    tabs?.select('results');
     announce(`${F.ko} ${F.perfect}`);
-    if (scroll && results) {
-      results.scrollIntoView({ behavior: reducedMotion() ? 'auto' : 'smooth', block: 'start' });
-    }
+    el.dispatchEvent(new CustomEvent('stage:cleared', { bubbles: true, detail: { id } }));
   }
 
   function skip() {
     if (done) return;
-    stopTimer();
-    clear(true);
+    clear();
   }
 
   function reset() {
@@ -147,18 +161,19 @@ function createStage(el) {
     }
     time = 99;
     if (timerEl) timerEl.textContent = '99';
+    tabs?.select('brief');
   }
 
   function tick() {
     time = Math.max(0, time - 1);
-    if (timerEl) timerEl.textContent = time ? String(time).padStart(2, '0') : '∞';
+    if (timerEl) timerEl.textContent = String(time).padStart(2, '0');
     if (!time) stopTimer();
   }
 
   function startTimer() {
     stopTimer();
     if (done || reducedMotion()) return;
-    timer = setInterval(tick, 1000);
+    timer = setInterval(tick, TICK_MS);
   }
 
   function stopTimer() {
@@ -166,14 +181,14 @@ function createStage(el) {
     timer = null;
   }
 
-  // Un projet déjà battu (visite précédente) s'affiche directement vaincu.
+  // Une mission déjà réussie (visite précédente) s'affiche directement vaincue.
   if (cleared.has(id)) {
     reveal(total);
     n = total;
     done = true;
-    setHP();
     el.classList.add('is-ko', 'is-cleared');
   }
+  setHP();
 
   attackBtn?.addEventListener('click', () => strike());
   el.querySelector('[data-skip]')?.addEventListener('click', skip);
@@ -187,8 +202,14 @@ function createStage(el) {
   return {
     el,
     id,
+    tabs,
     strike,
-    enter: startTimer,
+    enter() {
+      // Première visite : le brief ; mission déjà réussie : le résultat.
+      if (!visited) tabs?.select(done ? 'results' : 'brief');
+      visited = true;
+      startTimer();
+    },
     leave: stopTimer,
     get done() {
       return done;
@@ -196,9 +217,16 @@ function createStage(el) {
   };
 }
 
+let all = new Map();
+
 export function initStages() {
-  const map = new Map();
-  document.querySelectorAll('.stage').forEach((el) => map.set(el.id, createStage(el)));
+  all = new Map();
+  document.querySelectorAll('.stage').forEach((el) => all.set(el.id, createStage(el)));
   cleared.forEach((id) => document.querySelectorAll(`.tile[data-stage="${id}"]`).forEach((t) => t.classList.add('is-cleared')));
-  return map;
+  setTabsEnabled(isGame());
+  return all;
+}
+
+export function setTabsEnabled(on) {
+  all.forEach((s) => s.tabs?.setEnabled(on));
 }

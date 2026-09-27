@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; manifest-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; upgrade-insecure-requests">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ProjecTTrone Lite · Demo · MRGMF</title>
+<meta name="description" content="A 2D mini-game recreating ProjecTTrone’s mechanics: exploring a medieval town, raycast item pickup, inventory and the throne room.">
+<link rel="canonical" href="https://mrgmf.github.io/en/demos/projecttrone/">
+<link rel="alternate" hreflang="fr" href="https://mrgmf.github.io/demos/projecttrone/">
+<link rel="alternate" hreflang="en" href="https://mrgmf.github.io/en/demos/projecttrone/">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#07070f">
+<meta name="author" content="Fodié Marega">
+<link rel="icon" href="../../../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="../../../assets/fonts/chakra-petch-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../../../assets/css/demo.css">
+</head>
+<body class="demo-page demo-page--projecttrone">
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="demo-bar">
+  <a class="demo-back" href="../../#vs-trone"><svg class="ico ico--left" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5 8 12l7 7"/></svg> Back to the portfolio</a>
+  <p class="demo-brand"><span class="demo-p1" aria-hidden="true">P1</span> MRGMF · Demo</p>
+  <a class="demo-lang" href="../../../demos/projecttrone/" hreflang="fr" lang="fr">FR</a>
+</header>
+<main class="demo" id="main" tabindex="-1">
+  <header class="demo-head">
+    <p class="demo-kicker">Demo · ProjecTTrone · 2D mini-game</p>
+    <h1>ProjecTTrone Lite</h1>
+    <p class="demo-intro">The mechanics I coded in the 3D game, rebuilt in 2D for the browser: explore the medieval town, pick up items spotted by a ray (“Press E”), manage the inventory (I key) and open the throne room.</p>
+    <p class="demo-note"><svg class="ico ico--shield" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 19 6v5.5c0 4.2-2.9 7.6-7 9-4.1-1.4-7-4.8-7-9V6z"/><path d="m9 12 2.2 2.2L15.5 10"/></svg> Graphics drawn in code for the demo: the original project’s licensed assets are not published.</p>
+  </header>
+  <p class="demo-nojs" data-nojs>This demo needs JavaScript to run. The rest of the portfolio stays readable without it.</p>
+  <div class="game-wrap">
+    <div>
+      <div class="screen-frame" data-frame tabindex="0" aria-describedby="pt-controls">
+        <canvas class="game" width="320" height="208" data-canvas role="img" aria-label="Top-down medieval town: the player’s knight, houses, a well, a pond and the castle to the north."></canvas>
+        <p class="prompt" data-prompt hidden></p>
+      </div>
+      <div class="pad" aria-label="Directional pad" role="group">
+        <button class="up" type="button" data-dir="u" aria-label="Up"><svg class="ico ico--right" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg></button>
+        <button class="left" type="button" data-dir="l" aria-label="Left"><svg class="ico ico--right" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg></button>
+        <button class="down" type="button" data-dir="d" aria-label="Down"><svg class="ico ico--right" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg></button>
+        <button class="right" type="button" data-dir="r" aria-label="Right"><svg class="ico ico--right" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg></button>
+      </div>
+      <p class="touch-actions"><button class="btn" type="button" data-interact>Pick up · E</button> <button class="btn btn--ghost" type="button" data-inventory-toggle>Inventory · I</button></p>
+      <p class="status" data-status role="status" aria-live="polite"></p>
+    </div>
+    <aside class="grid">
+      <section class="card" aria-labelledby="obj-h">
+        <h2 id="obj-h">Objective</h2>
+        <p class="objective" data-objective></p>
+        <p class="actions"><button class="btn btn--small btn--ghost" type="button" data-restart>Start over</button></p>
+      </section>
+      <section class="card" aria-labelledby="inv-h" data-inventory-panel>
+        <h2 id="inv-h">Inventory <span data-inv-count>0/5</span></h2>
+        <ul class="inventory" data-inventory></ul>
+        <p class="hint" data-item-detail>Picked-up items show here. Data (ItemData) and world items (Item) are kept apart, as in the Unity project.</p>
+      </section>
+      <section class="card" aria-labelledby="pt-controls-h">
+        <h2 id="pt-controls-h">Controls</h2>
+        <ul id="pt-controls">
+          <li>Arrows or WASD: move.</li>
+          <li>E: pick up the targeted item, open the gate, sit on the throne.</li>
+          <li>I: show or hide the inventory.</li>
+          <li>On mobile: the pad and buttons under the game.</li>
+        </ul>
+      </section>
+    </aside>
+  </div>
+</main>
+<footer class="demo-foot">
+  <p>© 2026 Fodié Marega · <a href="../../#vs-trone">Back to the portfolio</a> · <a href="https://github.com/MrgMF/MRGMF.github.io/tree/main/assets/js/demos" rel="noopener">Demo source code</a></p>
+</footer>
+<script type="application/json" id="demo-i18n">{"items":{"sword":["Sword","A training blade, perfect for the sandbox."],"shield":["Shield","In player 1’s colours."],"potion":["Potion","Restores health. Or morale."],"map":["Map","The town plan, with the castle to the north."],"key":["Castle key","Opens the great gate of the throne room."]},"empty":"Empty","pick":"E: pick up {item}","pickTouch":"Pick up {item}","picked":"{item} picked up!","gatePrompt":"E: open the gate","gateLocked":"The gate is locked: you need the castle key.","gateOpen":"The castle gate opens!","thronePrompt":"E: sit on the throne","victory":"Victory! Throne taken with {n}/5 items in {s}s.","victoryTitle":"VICTORY!","objectives":{"key":"Explore the town and find the castle key.","gate":"You have the key: open the castle gate, to the north.","throne":"The gate is open: reach the throne.","done":"Throne taken! Start over to beat your time."},"inventoryShown":"Inventory shown.","inventoryHidden":"Inventory hidden.","start":"Click (or tap) the game, then explore the town."}</script>
+<script type="module" src="../../../assets/js/demos/projecttrone.js"></script>
+</body>
+</html>

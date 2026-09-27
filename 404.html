@@ -2,6 +2,8 @@
 <html lang="fr" class="no-js" data-mode="reading">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-exmvWEJIMaMvGh3DNgz73cRpQ8xNTIwt/m+LgVdezEE='; style-src 'self'; img-src 'self'; font-src 'self'; manifest-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; upgrade-insecure-requests">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Game over · MRGMF</title>
 <meta name="robots" content="noindex">
@@ -18,8 +20,6 @@
   <p class="continue" aria-hidden="true"><span>Continue ?</span> <b data-count>9</b></p>
   <p class="gameover-actions"><a class="btn" href="/">Retour à l’écran titre</a> <a class="btn btn--ghost" href="/en/" lang="en">Back to the title screen</a></p>
 </main>
-<script>
-(function(){var b=document.querySelector('[data-count]');var n=9;if(matchMedia('(prefers-reduced-motion: reduce)').matches){b.textContent='0';return}var t=setInterval(function(){n--;b.textContent=n;if(n<=0)clearInterval(t)},1000)})();
-</script>
+<script>(function(){var b=document.querySelector('[data-count]');var n=9;if(matchMedia('(prefers-reduced-motion: reduce)').matches){b.textContent='0';return}var t=setInterval(function(){n--;b.textContent=n;if(n<=0)clearInterval(t)},1000)})();</script>
 </body>
 </html>

@@ -271,6 +271,58 @@ function floppy() {
   return outline(g, 'k');
 }
 
+// L'HYDRE À TICKETS (le support IT) : on ferme un ticket, deux repoussent.
+function hydra() {
+  const g = grid(BOSS_W, BOSS_H);
+  // Corps
+  ellipse(g, 13, 21, 10, 5, 'a');
+  tint(g, 'a', 'A', (x, y) => y >= 23 || x <= 5);
+  // Cous
+  line(g, 7, 19, 5, 11, 'a', 2.6);
+  line(g, 13, 18, 13, 8, 'a', 2.6);
+  line(g, 19, 19, 21, 11, 'a', 2.6);
+  // Têtes = tickets (feuille blanche + bandeau rouge « # »)
+  const head = (x, y) => {
+    rect(g, x, y, 7, 6, 'w');
+    rect(g, x, y, 7, 2, 'r');
+    put(g, x + 1, y + 3, 'e');
+    put(g, x + 5, y + 3, 'e');
+    rect(g, x + 2, y + 5, 3, 1, 'e');
+  };
+  head(1, 5);
+  head(10, 2);
+  head(18, 5);
+  // Griffes
+  rect(g, 5, 25, 2, 1, 'k');
+  rect(g, 19, 25, 2, 1, 'k');
+  return outline(g, 'k');
+}
+
+// LA DÉRIVE : un portable qui sort de la conformité en silence.
+function laptop() {
+  const g = grid(BOSS_W, BOSS_H);
+  // Écran
+  rect(g, 4, 3, 18, 13, 'a');
+  rect(g, 6, 5, 14, 9, 'S');
+  // Visage glitché
+  rect(g, 8, 7, 3, 2, 'r');
+  rect(g, 15, 7, 3, 2, 'r');
+  rect(g, 9, 11, 8, 1, 'r');
+  rect(g, 12, 6, 2, 1, 'l');
+  rect(g, 17, 10, 3, 1, 'l');
+  rect(g, 6, 12, 4, 1, 'l');
+  // Charnière + clavier en perspective
+  rect(g, 3, 16, 20, 1, 'A');
+  poly(g, [[3, 17], [23, 17], [25, 22], [1, 22]], 'a');
+  for (let i = 0; i < 4; i++) rect(g, 5 + i * 4, 18, 3, 1, 'A');
+  rect(g, 9, 20, 8, 1, 'A');
+  // Panneau d'alerte
+  poly(g, [[21, 0], [25, 7], [17, 7]], 'y');
+  rect(g, 21, 2, 1, 3, 'e');
+  put(g, 21, 6, 'e');
+  return outline(g, 'k');
+}
+
 // Tuile verrouillée : un « ? » massif.
 const QMARK = [
   '..XXXXXX..',
@@ -308,6 +360,8 @@ const BOSS_DEFS = {
   cube: { draw: cube, pal: { a: '#3b2a7a', A: '#23174d', l: '#5b46b3', v: '#3ff0ff' } },
   paper: { draw: paper, pal: { a: '#f5f2ea', A: '#b9b3a4' } },
   floppy: { draw: floppy, pal: { a: '#ff4fd8', A: '#b62c98', l: '#c9ccd9' } },
+  hydra: { draw: hydra, pal: { a: '#3ddc84', A: '#1f9a5a', w: '#f5f2ea' } },
+  laptop: { draw: laptop, pal: { a: '#c9ccd9', A: '#8a8fa6', S: '#1b2a4a', l: '#3ff0ff', y: '#ffd23f' } },
   mystery: { draw: mystery, pal: { a: 'var(--c-mystery,#5d5d80)' } },
 };
 
@@ -323,6 +377,123 @@ export function bossSVG(id, { cls = '', label = '' } = {}) {
 }
 
 export const BOSS_IDS = Object.keys(BOSS_DEFS);
+
+// --- Alliés (assists) : ils combattent AVEC le joueur 1 -------------------
+const ALLY_W = 20;
+const ALLY_H = 20;
+
+// NEXTHINK : un drone d'observation qui scanne le parc et corrige à distance.
+function drone() {
+  const g = grid(ALLY_W, ALLY_H);
+  // Rotors et bras
+  rect(g, 1, 4, 6, 1, 'A');
+  rect(g, 13, 4, 6, 1, 'A');
+  line(g, 4, 5, 6, 7, 'A');
+  line(g, 15, 5, 13, 7, 'A');
+  // Antenne
+  line(g, 10, 2, 10, 5, 'A');
+  put(g, 10, 1, 'l');
+  // Corps
+  ellipse(g, 10, 10.5, 6.2, 5.2, 'a');
+  tint(g, 'a', 'A', (x, y) => y >= 13 || x <= 5);
+  // Visière et œil qui scanne
+  rect(g, 6, 8, 8, 3, 'S');
+  rect(g, 10, 8, 2, 2, 'l');
+  put(g, 11, 8, 'w');
+  rect(g, 7, 10, 2, 1, 'L');
+  // Propulseur
+  rect(g, 9, 16, 2, 1, 'l');
+  return outline(g, 'k');
+}
+
+const ALLY_DEFS = {
+  drone: { draw: drone, pal: { a: '#eaf2ff', A: '#a9b8d6', S: '#13233d', l: '#36e0a0', L: '#1f8a63', w: '#ffffff' } },
+};
+
+export function allySVG(id, { cls = '' } = {}) {
+  if (!ALLY_DEFS[id]) throw new Error(`Allié inconnu : ${id}`);
+  return `<svg class="px ally ally--${id} ${cls}" viewBox="0 0 ${ALLY_W} ${ALLY_H}" aria-hidden="true" focusable="false"><use href="#a-${id}"/></svg>`;
+}
+
+// --- Améliorations : diplômes et certifications ----------------------------
+const UP = 16;
+
+// Diplôme : un parchemin roulé, scellé.
+function scroll() {
+  const g = grid(UP, UP);
+  rect(g, 3, 3, 10, 9, 'p');
+  rect(g, 1, 2, 3, 11, 'P');
+  rect(g, 12, 2, 3, 11, 'P');
+  rect(g, 2, 2, 1, 11, 'q');
+  rect(g, 13, 2, 1, 11, 'q');
+  rect(g, 5, 5, 6, 1, 'P');
+  rect(g, 5, 7, 4, 1, 'P');
+  rect(g, 8, 12, 1, 3, 'r');
+  rect(g, 11, 12, 1, 3, 'r');
+  ellipse(g, 9.5, 10.5, 2.1, 2.1, 'r');
+  put(g, 9, 10, 'R');
+  return outline(g, 'k');
+}
+
+// Formation supérieure : la toque.
+function cap() {
+  const g = grid(UP, UP);
+  rect(g, 4, 8, 8, 4, 'A');
+  poly(g, [[0.5, 6.5], [8, 2.5], [15.5, 6.5], [8, 10.5]], 'a');
+  tint(g, 'a', 'l', (x, y) => y <= 4);
+  line(g, 8, 6, 13, 8, 'y');
+  rect(g, 13, 8, 1, 4, 'y');
+  rect(g, 12, 12, 3, 2, 'y');
+  put(g, 8, 6, 'y');
+  return outline(g, 'k');
+}
+
+// Certification : la médaille.
+function medal() {
+  const g = grid(UP, UP);
+  poly(g, [[3, 0], [7, 0], [9, 7], [5, 7]], 'r');
+  poly(g, [[9, 0], [13, 0], [11, 7], [7, 7]], 'b');
+  ellipse(g, 8, 11, 4.6, 4.6, 'y');
+  ellipse(g, 8, 11, 2.8, 2.8, 'Y');
+  put(g, 7, 9, 'w');
+  put(g, 6, 10, 'w');
+  return outline(g, 'k');
+}
+
+// À débloquer : le cadenas.
+function lock() {
+  const g = grid(UP, UP);
+  rect(g, 5, 1, 6, 2, 'A');
+  rect(g, 4, 2, 2, 5, 'A');
+  rect(g, 10, 2, 2, 5, 'A');
+  rect(g, 3, 7, 10, 8, 'a');
+  tint(g, 'a', 'l', (x, y) => y === 7);
+  rect(g, 6, 9, 4, 2, 'k');
+  rect(g, 7, 11, 2, 2, 'k');
+  return outline(g, 'k');
+}
+
+const UPGRADE_DEFS = {
+  scroll: { draw: scroll, pal: { p: '#f5e6c8', P: '#c9ab78', q: '#fff6de', r: '#ff3d5a', R: '#ffb3bf' } },
+  cap: { draw: cap, pal: { a: '#5a5ae0', A: '#2e2e86', l: '#8d8dff', y: '#ffd23f' } },
+  medal: { draw: medal, pal: { r: '#ff3d5a', b: '#3aa0ff', y: '#ffd23f', Y: '#e8a800', w: '#fff6c8' } },
+  lock: { draw: lock, pal: { a: '#6b6b92', A: '#b8b8cc', l: '#8d8db5' } },
+};
+
+export function upgradeSVG(id, { cls = '' } = {}) {
+  if (!UPGRADE_DEFS[id]) throw new Error(`Amélioration inconnue : ${id}`);
+  return `<svg class="px up up--${id} ${cls}" viewBox="0 0 ${UP} ${UP}" aria-hidden="true" focusable="false"><use href="#u-${id}"/></svg>`;
+}
+
+export function standaloneUpgrade(id) {
+  const def = UPGRADE_DEFS[id];
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${UP} ${UP}" shape-rendering="crispEdges">${svgGroup(def.draw(), resolveVars({ ...BASE, ...def.pal }))}</svg>`;
+}
+
+export function standaloneAlly(id) {
+  const def = ALLY_DEFS[id];
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${ALLY_W} ${ALLY_H}" shape-rendering="crispEdges">${svgGroup(def.draw(), resolveVars({ ...BASE, ...def.pal }))}</svg>`;
+}
 
 // --- Icônes de manipulation (notation « numpad » des jeux de combat) ------
 // 1 ↙ 2 ↓ 3 ↘ / 4 ← 5 · 6 → / 7 ↖ 8 ↑ 9 ↗
@@ -344,16 +515,22 @@ export function spriteSheet() {
   const bosses = Object.entries(BOSS_DEFS)
     .map(([id, def]) => `<symbol id="b-${id}" viewBox="0 0 ${BOSS_W} ${BOSS_H}">${paths(def.draw(), { ...BASE, ...def.pal })}</symbol>`)
     .join('');
-  // Les styles passent par des variables CSS : les sélecteurs du document
-  // n'atteignent pas l'intérieur d'un <use>, mais les variables, si.
-  const bg = 'fill:var(--in-bg,#0b0b16);stroke:var(--in-line,#fff);stroke-width:1.5';
+  const allies = Object.entries(ALLY_DEFS)
+    .map(([id, def]) => `<symbol id="a-${id}" viewBox="0 0 ${ALLY_W} ${ALLY_H}">${paths(def.draw(), { ...BASE, ...def.pal })}</symbol>`)
+    .join('');
+  const upgrades = Object.entries(UPGRADE_DEFS)
+    .map(([id, def]) => `<symbol id="u-${id}" viewBox="0 0 ${UP} ${UP}">${paths(def.draw(), { ...BASE, ...def.pal })}</symbol>`)
+    .join('');
+  // Les styles passent par des classes (site.css) et des variables CSS : les
+  // variables traversent la frontière du <use>, ce qui permet de colorer
+  // chaque instance (touches allumées, costumes).
   const inputs =
-    `<symbol id="in-dir" viewBox="0 0 24 24"><circle style="${bg}" cx="12" cy="12" r="10.5"/><path style="fill:none;stroke:var(--in-fg,#fff);stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round" d="M6 12h10m-4-4 4 4-4 4"/></symbol>` +
+    `<symbol id="in-dir" viewBox="0 0 24 24"><circle class="in-bg" cx="12" cy="12" r="10.5"/><path class="in-arrow" d="M6 12h10m-4-4 4 4-4 4"/></symbol>` +
     ['P', 'K']
       .map(
         (b) =>
-          `<symbol id="in-${b}" viewBox="0 0 24 24"><circle style="${bg}" cx="12" cy="12" r="10.5"/><text style="fill:var(--in-fg,#fff);font:700 13px 'Chakra Petch',system-ui,sans-serif" x="12" y="16.6" text-anchor="middle">${b}</text></symbol>`
+          `<symbol id="in-${b}" viewBox="0 0 24 24"><circle class="in-bg" cx="12" cy="12" r="10.5"/><text class="in-txt" x="12" y="16.6" text-anchor="middle">${b}</text></symbol>`
       )
       .join('');
-  return `<svg class="sprite-sheet" width="0" height="0" aria-hidden="true" focusable="false"><defs>${p1}${bosses}${inputs}</defs></svg>`;
+  return `<svg class="sprite-sheet" width="0" height="0" aria-hidden="true" focusable="false"><defs>${p1}${bosses}${allies}${upgrades}${inputs}</defs></svg>`;
 }

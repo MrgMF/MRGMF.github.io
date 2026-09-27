@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; manifest-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; upgrade-insecure-requests">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ticket Rush · Démo · MRGMF</title>
+<meta name="description" content="Mini-jeu de support IT : résous ou escalade les tickets au bon niveau avant la fin du SLA, et monte du niveau 1 au niveau 3.">
+<link rel="canonical" href="https://mrgmf.github.io/demos/tickets/">
+<link rel="alternate" hreflang="fr" href="https://mrgmf.github.io/demos/tickets/">
+<link rel="alternate" hreflang="en" href="https://mrgmf.github.io/en/demos/tickets/">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#07070f">
+<meta name="author" content="Fodié Marega">
+<link rel="icon" href="../../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="../../assets/fonts/chakra-petch-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../../assets/css/demo.css">
+</head>
+<body class="demo-page demo-page--tickets">
+<a class="skip-link" href="#main">Aller au contenu</a>
+<header class="demo-bar">
+  <a class="demo-back" href="../../#vs-bain"><svg class="ico ico--left" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5 8 12l7 7"/></svg> Retour au portfolio</a>
+  <p class="demo-brand"><span class="demo-p1" aria-hidden="true">P1</span> MRGMF · Démo</p>
+  <a class="demo-lang" href="../../en/demos/tickets/" hreflang="en" lang="en">EN</a>
+</header>
+<main class="demo" id="main" tabindex="-1">
+  <header class="demo-head">
+    <p class="demo-kicker">Démo · Support IT de N1 à N3 · mini-jeu</p>
+    <h1>Ticket Rush</h1>
+    <p class="demo-intro">Le support IT en accéléré : des tickets tombent, à toi de les résoudre ou de les escalader au bon niveau avant la fin du délai (SLA). Tu commences au niveau 1 ; chaque bonne décision te fait monter vers le N3.</p>
+    <p class="demo-note"><svg class="ico ico--shield" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 19 6v5.5c0 4.2-2.9 7.6-7 9-4.1-1.4-7-4.8-7-9V6z"/><path d="m9 12 2.2 2.2L15.5 10"/></svg> Tickets entièrement fictifs, sans aucune donnée d’entreprise.</p>
+  </header>
+  <p class="demo-nojs" data-nojs>Cette démo a besoin de JavaScript pour fonctionner. Le reste du portfolio reste lisible sans.</p>
+  <section class="rush" aria-labelledby="rush-h">
+    <h2 id="rush-h" class="sr-only">Partie en cours</h2>
+    <div class="rush-hud">
+      <span class="level-badge" data-level>N1</span>
+      <dl>
+        <div><dt>Score</dt><dd data-score>0</dd></div>
+        <div><dt>Temps</dt><dd data-time>90</dd></div>
+        <div><dt>Résolus</dt><dd data-resolved>0</dd></div>
+      </dl>
+      <p class="hydra-meter"><span>L’Hydre</span><span class="meter" aria-hidden="true"><i data-hydra></i></span><span data-queue-count>0/8</span></p>
+    </div>
+    <p class="actions"><button class="btn" type="button" data-start>Prendre le service</button></p>
+    <p class="status" data-status role="status" aria-live="polite">Prêt ? 90 secondes de service, 8 tickets en attente maximum.</p>
+    <ol class="queue" data-queue aria-label="File de tickets"></ol>
+    <div class="card rush-over" data-over hidden>
+      <h2>Fin du service</h2>
+      <p data-summary></p>
+    </div>
+  </section>
+  <div class="grid grid--2">
+    <section class="card" aria-labelledby="rules-h">
+      <h2 id="rules-h">Règles</h2>
+      <ul>
+        <li>Un ticket de ton niveau ou en dessous : résous-le.</li>
+        <li>Un ticket au-dessus de ton niveau : escalade-le, c’est le bon réflexe.</li>
+        <li>Un ticket qui dépasse son SLA génère une relance.</li>
+        <li>Huit tickets en attente et l’Hydre l’emporte.</li>
+      </ul>
+      <p class="hint">Clavier : R résout le plus ancien ticket, E l’escalade.</p>
+    </section>
+    <section class="card" aria-labelledby="levels-h">
+      <h2 id="levels-h">Progression</h2>
+      <ul>
+        <li>N1 : poste de travail, périphériques, comptes.</li>
+        <li>N2 : Active Directory, Microsoft 365, applications. Débloqué à 60 points.</li>
+        <li>N3 : serveurs et automatisation. Débloqué à 180 points.</li>
+      </ul>
+    </section>
+  </div>
+</main>
+<footer class="demo-foot">
+  <p>© 2026 Fodié Marega · <a href="../../#vs-bain">Retour au portfolio</a> · <a href="https://github.com/MrgMF/MRGMF.github.io/tree/main/assets/js/demos" rel="noopener">Code de la démo</a></p>
+</footer>
+<script type="application/json" id="demo-i18n">{"replay":"Rejouer","resolve":"Résoudre","escalate":"Escalader","levelTag":"N{l}","sla":"SLA","msgs":{"resolved":"Résolu au N{l} : +{p}.","escalated":"Bon réflexe : escaladé au niveau supérieur, +{p}.","useless":"Escalade inutile : tu pouvais le résoudre. {p}.","outOfScope":"Hors de ton périmètre : le ticket est rouvert et l’Hydre grandit.","late":"SLA dépassé : une relance arrive.","levelUp":"Niveau N{l} débloqué !","start":"Service commencé. Bon courage !"},"followUp":"Relance : {title}","overTime":"Temps écoulé. {resolved} ticket(s) résolu(s), {escalated} bonne(s) escalade(s), {late} en retard. Niveau atteint : N{level}. Score : {score}.","overHydra":"L’Hydre a gagné : trop de tickets en attente. {resolved} ticket(s) résolu(s), niveau atteint : N{level}. Score : {score}.","tickets":[[1,"Écran noir au démarrage","Poste · matériel"],[1,"Mot de passe expiré","Compte"],[1,"Casque Teams sans son","Périphérique"],[1,"Préparer le poste d’un nouvel arrivant","Parc"],[1,"Souris sans fil qui ne répond plus","Périphérique"],[1,"Compte verrouillé après les congés","Compte"],[2,"Accès au dossier partagé du projet","Active Directory"],[2,"Boîte partagée absente d’Outlook","Microsoft 365"],[2,"Licence Microsoft 365 manquante","Microsoft 365"],[2,"Application métier qui plante au lancement","Application"],[2,"Ajout à un groupe de sécurité","Active Directory"],[3,"Serveur de fichiers presque plein","Serveur"],[3,"Script de déploiement en échec sur 40 postes","Automatisation"],[3,"Certificat expiré sur un serveur interne","Serveur"],[3,"Tâche planifiée PowerShell en erreur","Automatisation"],[3,"Réplication Active Directory en retard","Serveur"]]}</script>
+<script type="module" src="../../assets/js/demos/tickets.js"></script>
+</body>
+</html>

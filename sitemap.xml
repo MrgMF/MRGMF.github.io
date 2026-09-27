@@ -10,4 +10,64 @@
     <xhtml:link rel="alternate" hreflang="fr" href="https://mrgmf.github.io/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://mrgmf.github.io/en/"/>
   </url>
+  <url>
+    <loc>https://mrgmf.github.io/demos/acces-conditionnel/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://mrgmf.github.io/demos/acces-conditionnel/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://mrgmf.github.io/en/demos/acces-conditionnel/"/>
+  </url>
+  <url>
+    <loc>https://mrgmf.github.io/en/demos/acces-conditionnel/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://mrgmf.github.io/demos/acces-conditionnel/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://mrgmf.github.io/en/demos/acces-conditionnel/"/>
+  </url>
+  <url>
+    <loc>https://mrgmf.github.io/demos/nexthink/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://mrgmf.github.io/demos/nexthink/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://mrgmf.github.io/en/demos/nexthink/"/>
+  </url>
+  <url>
+    <loc>https://mrgmf.github.io/en/demos/nexthink/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://mrgmf.github.io/demos/nexthink/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://mrgmf.github.io/en/demos/nexthink/"/>
+  </url>
+  <url>
+    <loc>https://mrgmf.github.io/demos/learnlink/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://mrgmf.github.io/demos/learnlink/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://mrgmf.github.io/en/demos/learnlink/"/>
+  </url>
+  <url>
+    <loc>https://mrgmf.github.io/en/demos/learnlink/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://mrgmf.github.io/demos/learnlink/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://mrgmf.github.io/en/demos/learnlink/"/>
+  </url>
+  <url>
+    <loc>https://mrgmf.github.io/demos/tickets/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://mrgmf.github.io/demos/tickets/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://mrgmf.github.io/en/demos/tickets/"/>
+  </url>
+  <url>
+    <loc>https://mrgmf.github.io/en/demos/tickets/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://mrgmf.github.io/demos/tickets/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://mrgmf.github.io/en/demos/tickets/"/>
+  </url>
+  <url>
+    <loc>https://mrgmf.github.io/demos/hotel/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://mrgmf.github.io/demos/hotel/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://mrgmf.github.io/en/demos/hotel/"/>
+  </url>
+  <url>
+    <loc>https://mrgmf.github.io/en/demos/hotel/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://mrgmf.github.io/demos/hotel/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://mrgmf.github.io/en/demos/hotel/"/>
+  </url>
+  <url>
+    <loc>https://mrgmf.github.io/demos/projecttrone/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://mrgmf.github.io/demos/projecttrone/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://mrgmf.github.io/en/demos/projecttrone/"/>
+  </url>
+  <url>
+    <loc>https://mrgmf.github.io/en/demos/projecttrone/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://mrgmf.github.io/demos/projecttrone/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://mrgmf.github.io/en/demos/projecttrone/"/>
+  </url>
 </urlset>
