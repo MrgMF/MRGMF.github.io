@@ -1,9 +1,11 @@
-// Borne d'arcade : routage entre écrans, sélection d'adversaire, écran VS,
-// move list, fiche combattant, contact et réglages (son, mode lecture).
+// Borne d'arcade : routage entre écrans, sélection des missions, écran VS,
+// progression (diplômes et certifications), compétences, fiche combattant,
+// contact et réglages (son, mode lecture).
 
 import * as input from './input.js';
 import { sfx, setSound, isSoundOn, armOnGesture } from './audio.js';
-import { initStages } from './stage.js';
+import { initStages, setTabsEnabled } from './stage.js';
+import * as progress from './progress.js';
 import { root, i18n, store, isGame, reducedMotion, toast, announce, pulseClass, wait } from './util.js';
 
 window.__arcadeReady = true;
@@ -13,7 +15,7 @@ const $ = (sel, ctx = document) => ctx.querySelector(sel);
 const $$ = (sel, ctx = document) => [...ctx.querySelectorAll(sel)];
 
 const screens = new Map($$('.screen').map((el) => [el.id, el]));
-const hudScreen = $('[data-hud-screen]');
+const navLinks = $$('[data-nav]');
 const baseTitle = document.title;
 const stages = initStages();
 let current = null;
@@ -21,8 +23,27 @@ let current = null;
 // --- Écrans -------------------------------------------------------------------
 function labelFor(el) {
   if (!el) return '';
-  if (el.dataset.screen === 'stage') return `${i18n.screens.stage} · ${$('.screen-heading', el)?.textContent || ''}`;
+  const kind = el.dataset.screen;
+  const heading = $('.screen-heading', el)?.textContent || '';
+  if (kind === 'stage' || kind === 'upgrade') return `${i18n.screens[kind]} · ${heading}`;
   return i18n.screens[el.id] || el.id;
+}
+
+// Onglet de navigation correspondant à un écran (un combat relève des missions,
+// une amélioration de la progression).
+function navFor(el) {
+  const kind = el?.dataset.screen;
+  if (kind === 'stage') return 'select';
+  if (kind === 'upgrade') return 'progress';
+  return el?.id;
+}
+
+function markNav(el) {
+  const target = el ? navFor(el) : null;
+  navLinks.forEach((a) => {
+    if (a.dataset.nav === target) a.setAttribute('aria-current', 'page');
+    else a.removeAttribute('aria-current');
+  });
 }
 
 function show(id) {
@@ -34,15 +55,16 @@ function show(id) {
     leaveHooks[current.dataset.screen]?.(current);
   }
   current = el;
+  root.dataset.screen = el.dataset.screen;
   el.classList.add('is-active');
   el.scrollTop = 0;
+  markNav(el);
   const label = labelFor(el);
-  if (hudScreen) hudScreen.textContent = label;
   document.title = el.id === 'title' ? baseTitle : `${label} · MRGMF`;
   stages.get(el.id)?.enter();
   enterHooks[el.dataset.screen]?.(el);
   if (el.id !== 'select') $('.screen-heading', el)?.focus({ preventScroll: true });
-  announce(`${i18n.announceScreen} : ${label}`);
+  announce(`${i18n.announceScreen}${i18n.colon} ${label}`);
 }
 
 function targetFromHash() {
@@ -71,18 +93,24 @@ function go(id) {
 
 window.addEventListener('hashchange', route);
 
-// --- Écran VS -------------------------------------------------------------------
+// --- Écran VS : le joueur 1 et son équipe face au problème -------------------------
 const vs = $('[data-vs]');
 const vsArt = $('[data-vs-art]');
 const vsName = $('[data-vs-name]');
+const vsTeam = $('[data-vs-team]');
+const vsAssist = $('[data-vs-assist]');
+const vsMission = $('[data-vs-mission]');
 const vsRound = $('[data-vs-round]');
 const bossStore = $('.boss-store');
 
 function playVS(stageEl) {
   return new Promise((resolve) => {
     const art = bossStore?.querySelector(`[data-art="${stageEl.dataset.sprite}"]`);
-    vsArt.innerHTML = art ? art.innerHTML : '';
+    vsArt.replaceChildren(...(art ? [...art.children].map((n) => n.cloneNode(true)) : []));
     vsName.textContent = stageEl.dataset.boss;
+    vsTeam.textContent = stageEl.dataset.team || '';
+    vsAssist.hidden = !stageEl.dataset.assist;
+    vsMission.textContent = `${i18n.fight.mission} · ${stageEl.dataset.mission}`;
     vsRound.textContent = '';
     vs.hidden = false;
     sfx.confirm();
@@ -115,36 +143,60 @@ function playVS(stageEl) {
 // --- Écran titre ------------------------------------------------------------------
 $('[data-press-start]')?.addEventListener('click', () => sfx.start());
 
-// --- Sélection -----------------------------------------------------------------
+// --- Sélection des missions ------------------------------------------------------
 const select = screens.get('select');
-const navItems = $$('.tile, .menu-btn', select).filter((el) => !el.closest('.reading-only'));
+const navItems = $$('.tile', select).filter((el) => !el.closest('.reading-only'));
+const p1 = {
+  squadLabel: $('[data-p1-squad-label]'),
+  squadName: $('[data-p1-squad-name]'),
+  assist: $('[data-p1-assist]'),
+  assistLine: $('[data-p1-assist-name]'),
+  assistText: $('[data-p1-assist-text]'),
+};
 const p2 = {
   name: $('[data-p2-name]'),
-  boss: $('[data-p2-boss]'),
-  tagline: $('[data-p2-tagline]'),
+  desc: $('[data-p2-desc]'),
   meta: $('[data-p2-meta]'),
   arts: $$('.p2-art', select),
 };
-let cursor = navItems.find((el) => el.classList.contains('tile'));
+const mission = {
+  name: $('[data-m-name]'),
+  kicker: $('[data-m-kicker]'),
+  tagline: $('[data-m-tagline]'),
+};
+let cursor = navItems[0];
 
 const unlocked = () => root.classList.contains('is-unlocked');
 
+function setText(el, text) {
+  if (el) el.textContent = text || '';
+}
+
 function preview(tile) {
-  if (!tile.classList.contains('tile')) return;
+  if (!tile?.classList.contains('tile')) return;
   const locked = tile.hasAttribute('data-secret') && !unlocked();
+  const L = i18n.select.locked;
   const d = locked
-    ? { name: i18n.select.locked.name, boss: '?', tagline: i18n.select.locked.tagline, sprite: 'mystery', meta: '[]' }
+    ? { name: L.name, kicker: '', tagline: L.tagline, boss: L.boss, bossdesc: '', sprite: 'mystery', meta: '[]', squadLabel: '', squadName: '', assist: '' }
     : tile.dataset;
-  p2.name.textContent = d.name;
-  p2.boss.textContent = d.boss;
-  p2.tagline.textContent = d.tagline;
+  // Côté joueur 1 : l'équipe (l'entreprise) et l'allié éventuel.
+  setText(p1.squadLabel, d.squadLabel);
+  if (p1.squadLabel) p1.squadLabel.hidden = !d.squadLabel;
+  setText(p1.squadName, d.squadName);
+  const hasAssist = Boolean(d.assist);
+  if (p1.assist) p1.assist.hidden = !hasAssist;
+  if (p1.assistLine) p1.assistLine.hidden = !hasAssist;
+  setText(p1.assistText, d.assist);
+  // Côté adversaire : le problème à régler.
+  setText(p2.name, d.boss);
+  setText(p2.desc, d.bossdesc);
   let meta = [];
   try {
     meta = JSON.parse(d.meta || '[]');
   } catch {
     meta = [];
   }
-  p2.meta.replaceChildren(
+  p2.meta?.replaceChildren(
     ...meta.map((m) => {
       const li = document.createElement('li');
       li.textContent = m;
@@ -152,10 +204,22 @@ function preview(tile) {
     })
   );
   p2.arts.forEach((a) => (a.hidden = a.dataset.art !== d.sprite));
+  // Au centre : la mission.
+  setText(mission.name, d.name);
+  setText(mission.kicker, d.kicker);
+  setText(mission.tagline, d.tagline);
+}
+
+const tipEl = $('[data-select-tip]');
+function hideTip() {
+  if (!tipEl || tipEl.hidden) return;
+  tipEl.hidden = true;
+  store.set('tip', '1');
 }
 
 function setCursor(el, { sound = false, focus = true } = {}) {
   if (!el) return;
+  if (sound) hideTip();
   navItems.forEach((i) => i.classList.toggle('is-focused', i === el));
   cursor = el;
   preview(el);
@@ -168,7 +232,7 @@ navItems.forEach((el) => {
   el.addEventListener('mouseenter', () => isGame() && setCursor(el, { focus: false }));
 });
 
-// Navigation spatiale : on cherche l'élément le plus proche dans la direction.
+// Navigation spatiale : on cherche la tuile la plus proche dans la direction.
 function neighbour(from, dir) {
   const r0 = from.getBoundingClientRect();
   const c0 = { x: r0.left + r0.width / 2, y: r0.top + r0.height / 2 };
@@ -194,9 +258,7 @@ function neighbour(from, dir) {
 }
 
 async function randomPick(tile) {
-  const pool = navItems.filter(
-    (el) => el.classList.contains('tile') && el.dataset.stage && (!el.hasAttribute('data-secret') || unlocked())
-  );
+  const pool = navItems.filter((el) => el.dataset.stage && (!el.hasAttribute('data-secret') || unlocked()));
   const choice = pool[Math.floor(Math.random() * pool.length)];
   if (!reducedMotion()) {
     for (let i = 0; i < 10; i++) {
@@ -214,6 +276,7 @@ select.addEventListener('click', (e) => {
   if (!isGame()) return;
   const tile = e.target.closest('.tile');
   if (!tile) return;
+  hideTip();
   if (tile.hasAttribute('data-random')) {
     e.preventDefault();
     sfx.confirm();
@@ -230,10 +293,33 @@ select.addEventListener('click', (e) => {
   pulseClass(tile, 'is-picked');
 });
 
+// --- Améliorations (diplômes, certifications) ----------------------------------------
+function enterUpgrade(el) {
+  if (el.hasAttribute('data-locked')) return;
+  const before = progress.level();
+  const fresh = progress.obtain(el.dataset.upgrade);
+  const after = progress.level();
+  setText($('[data-level-from]', el), String(before));
+  setText($('[data-level-to]', el), String(after));
+  el.classList.toggle('is-fresh', fresh);
+  if (fresh) {
+    pulseClass(el, 'is-levelup');
+    sfx.coin();
+    announce(`${i18n.progress.banner} ${i18n.progress.level} ${after}`);
+  }
+  progress.render();
+}
+
+document.addEventListener('stage:cleared', () => progress.render());
+
 const enterHooks = {
   select() {
     setCursor(cursor, { focus: true });
+    // Première visite : un petit rappel des commandes, jusqu'au premier choix.
+    if (tipEl && !store.get('tip')) tipEl.hidden = false;
   },
+  progress: () => progress.render(),
+  upgrade: enterUpgrade,
   contact: startContinue,
 };
 const leaveHooks = {
@@ -255,11 +341,19 @@ function confirm() {
   if (el && el !== document.body && el.matches('a[href], button')) el.click();
 }
 
+function goNext() {
+  const next = current && $('[data-next]', current);
+  if (!next) return false;
+  sfx.confirm();
+  next.click();
+  return true;
+}
+
 function back() {
-  if (!current) return;
-  if (current.id === 'title') return;
+  if (!current || current.id === 'title') return;
   sfx.back();
-  go(current.id === 'select' ? 'title' : 'select');
+  const kind = current.dataset.screen;
+  go(kind === 'upgrade' ? 'progress' : current.id === 'select' ? 'title' : 'select');
 }
 
 input.on('press', (btn) => {
@@ -271,20 +365,17 @@ input.on('press', (btn) => {
     sfx.start();
     return go('select');
   }
-  if (current.id === 'select' && btn === 'START') return confirm();
+  if (current.dataset.screen === 'upgrade' && (btn === 'START' || btn === 'P')) return goNext();
+  if (current.id === 'select' && (btn === 'START' || btn === 'P')) return confirm();
 });
 
-// Bouton A de la manette = valider, B = retour (hors combat et move list).
+// Bouton A de la manette = valider, B = retour (hors combat et compétences).
 input.on('pad', (btn) => {
   if (!isGame() || !current || routing) return;
   const fighting = current.dataset.screen === 'stage' || current.id === 'moves';
-  if (btn === 'P' && !fighting && current.id !== 'title' && current.id !== 'select') confirm();
+  const handled = ['title', 'select', 'upgrade'];
+  if (btn === 'P' && !fighting && !handled.includes(current.dataset.screen)) confirm();
   if (btn === 'K' && !fighting) back();
-});
-
-// Clavier J = valider sur la sélection.
-input.on('press', (btn) => {
-  if (isGame() && current?.id === 'select' && btn === 'P' && !routing) confirm();
 });
 
 input.on('padconnected', () => isGame() && toast(i18n.padConnected, 'info'));
@@ -302,7 +393,7 @@ input.on('strike', ({ move }) => {
   if (move) landMove(move, { toast: true });
 });
 
-// --- Move list -------------------------------------------------------------------
+// --- Compétences (move list) ---------------------------------------------------------
 const moveEls = $$('.move[data-move]');
 input.registerMoves(moveEls.map((el) => ({ id: el.dataset.move, input: el.dataset.input })));
 const found = new Set((store.get('moves', '') || '').split(',').filter((id) => moveEls.some((m) => m.dataset.move === id)));
@@ -350,7 +441,7 @@ moveEls.forEach((el) => {
   });
 });
 
-// --- Adversaire secret -------------------------------------------------------------
+// --- Mission secrète -------------------------------------------------------------------
 function unlock() {
   if (unlocked()) return;
   root.classList.add('is-unlocked');
@@ -450,18 +541,23 @@ soundBtn?.addEventListener('click', toggleSound);
 function setMode(mode) {
   root.dataset.mode = mode;
   store.set('mode', mode);
+  setTabsEnabled(mode === 'game');
   if (mode === 'game') {
     current = null;
     route();
     toast(i18n.toastArcade, 'info');
   } else {
     const id = current?.id;
+    const kind = current?.dataset.screen;
     current?.classList.remove('is-active');
     stages.get(id)?.leave();
     stopContinue();
     current = null;
+    delete root.dataset.screen;
+    markNav(null);
     document.title = baseTitle;
-    const target = id && id !== 'title' ? document.getElementById(id) : null;
+    // Une amélioration n'a pas d'écran en mode lecture : on vise la progression.
+    const target = id && id !== 'title' ? document.getElementById(kind === 'upgrade' ? 'progress' : id) : null;
     if (target) {
       target.scrollIntoView();
       $('.screen-heading', target)?.focus({ preventScroll: true });
@@ -469,15 +565,14 @@ function setMode(mode) {
     toast(i18n.toastReading, 'info');
   }
 }
-$$('[data-toggle-mode]').forEach((b) =>
-  b.addEventListener('click', () => setMode(isGame() ? 'reading' : 'game'))
-);
+$$('[data-toggle-mode]').forEach((b) => b.addEventListener('click', () => setMode(isGame() ? 'reading' : 'game')));
 
 const helpDialog = $('[data-help-dialog]');
 function openHelp() {
   if (helpDialog && !helpDialog.open) helpDialog.showModal();
 }
 $('[data-help]')?.addEventListener('click', openHelp);
+$('[data-close-dialog]')?.addEventListener('click', () => helpDialog?.close());
 
 // On garde l'écran courant en changeant de langue.
 $('[data-lang-switch]')?.addEventListener('click', (e) => {
@@ -493,4 +588,5 @@ $('.skip-link')?.addEventListener('click', (e) => {
 });
 
 // --- Démarrage --------------------------------------------------------------------
+progress.render();
 if (isGame()) route();

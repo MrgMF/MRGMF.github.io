@@ -130,12 +130,23 @@ export function paths(g, palette) {
   let out = '';
   for (const [c, d] of byColor) {
     const color = palette[c];
-    // Couleurs pilotées par variables CSS : via style= (plus robuste que var()
-    // dans un attribut de présentation).
-    const paint = color.startsWith('var(') ? `style="fill:${color}"` : `fill="${color}"`;
+    // Couleurs pilotées par variables CSS (costumes) : une classe définie dans
+    // site.css plutôt qu'un attribut style=, pour garder une CSP stricte
+    // (style-src 'self', sans 'unsafe-inline').
+    const paint = color.startsWith('var(') ? `class="${varClass(color)}"` : `fill="${color}"`;
     out += `<path ${paint} d="${d}"/>`;
   }
   return out;
+}
+
+// var(--c-main,#2f6bff) -> « vc-c-main » (règle correspondante dans site.css).
+export const VAR_CLASSES = new Map();
+export function varClass(color) {
+  const m = /^var\(--([a-z0-9-]+),\s*(#[0-9a-f]{3,8})\)$/i.exec(color);
+  if (!m) throw new Error(`Couleur variable invalide : ${color}`);
+  const cls = `vc-${m[1]}`;
+  VAR_CLASSES.set(cls, `fill:var(--${m[1]},${m[2]})`);
+  return cls;
 }
 
 export function svgGroup(g, palette, attrs = '') {

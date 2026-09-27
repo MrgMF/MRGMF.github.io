@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; manifest-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; upgrade-insecure-requests">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ticket Rush · Demo · MRGMF</title>
+<meta name="description" content="An IT support mini-game: solve or escalate tickets at the right level before their SLA runs out, and climb from level 1 to level 3.">
+<link rel="canonical" href="https://mrgmf.github.io/en/demos/tickets/">
+<link rel="alternate" hreflang="fr" href="https://mrgmf.github.io/demos/tickets/">
+<link rel="alternate" hreflang="en" href="https://mrgmf.github.io/en/demos/tickets/">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#07070f">
+<meta name="author" content="Fodié Marega">
+<link rel="icon" href="../../../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="../../../assets/fonts/chakra-petch-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../../../assets/css/demo.css">
+</head>
+<body class="demo-page demo-page--tickets">
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="demo-bar">
+  <a class="demo-back" href="../../#vs-bain"><svg class="ico ico--left" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5 8 12l7 7"/></svg> Back to the portfolio</a>
+  <p class="demo-brand"><span class="demo-p1" aria-hidden="true">P1</span> MRGMF · Demo</p>
+  <a class="demo-lang" href="../../../demos/tickets/" hreflang="fr" lang="fr">FR</a>
+</header>
+<main class="demo" id="main" tabindex="-1">
+  <header class="demo-head">
+    <p class="demo-kicker">Demo · IT support from L1 to L3 · mini-game</p>
+    <h1>Ticket Rush</h1>
+    <p class="demo-intro">IT support on fast-forward: tickets keep coming, and you solve them or escalate them to the right level before their deadline (SLA). You start at level 1; every good call takes you up towards L3.</p>
+    <p class="demo-note"><svg class="ico ico--shield" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 19 6v5.5c0 4.2-2.9 7.6-7 9-4.1-1.4-7-4.8-7-9V6z"/><path d="m9 12 2.2 2.2L15.5 10"/></svg> Entirely fictitious tickets, with no company data.</p>
+  </header>
+  <p class="demo-nojs" data-nojs>This demo needs JavaScript to run. The rest of the portfolio stays readable without it.</p>
+  <section class="rush" aria-labelledby="rush-h">
+    <h2 id="rush-h" class="sr-only">Game in progress</h2>
+    <div class="rush-hud">
+      <span class="level-badge" data-level>N1</span>
+      <dl>
+        <div><dt>Score</dt><dd data-score>0</dd></div>
+        <div><dt>Time</dt><dd data-time>90</dd></div>
+        <div><dt>Solved</dt><dd data-resolved>0</dd></div>
+      </dl>
+      <p class="hydra-meter"><span>The Hydra</span><span class="meter" aria-hidden="true"><i data-hydra></i></span><span data-queue-count>0/8</span></p>
+    </div>
+    <p class="actions"><button class="btn" type="button" data-start>Start the shift</button></p>
+    <p class="status" data-status role="status" aria-live="polite">Ready? A 90-second shift, 8 waiting tickets at most.</p>
+    <ol class="queue" data-queue aria-label="Ticket queue"></ol>
+    <div class="card rush-over" data-over hidden>
+      <h2>End of shift</h2>
+      <p data-summary></p>
+    </div>
+  </section>
+  <div class="grid grid--2">
+    <section class="card" aria-labelledby="rules-h">
+      <h2 id="rules-h">Rules</h2>
+      <ul>
+        <li>A ticket at or below your level: solve it.</li>
+        <li>A ticket above your level: escalate it, that is the right call.</li>
+        <li>A ticket that misses its SLA brings a follow-up.</li>
+        <li>Eight waiting tickets and the Hydra wins.</li>
+      </ul>
+      <p class="hint">Keyboard: R solves the oldest ticket, E escalates it.</p>
+    </section>
+    <section class="card" aria-labelledby="levels-h">
+      <h2 id="levels-h">Progression</h2>
+      <ul>
+        <li>L1: workstations, peripherals, accounts.</li>
+        <li>L2: Active Directory, Microsoft 365, applications. Unlocked at 60 points.</li>
+        <li>L3: servers and automation. Unlocked at 180 points.</li>
+      </ul>
+    </section>
+  </div>
+</main>
+<footer class="demo-foot">
+  <p>© 2026 Fodié Marega · <a href="../../#vs-bain">Back to the portfolio</a> · <a href="https://github.com/MrgMF/MRGMF.github.io/tree/main/assets/js/demos" rel="noopener">Demo source code</a></p>
+</footer>
+<script type="application/json" id="demo-i18n">{"replay":"Play again","resolve":"Solve","escalate":"Escalate","levelTag":"L{l}","sla":"SLA","msgs":{"resolved":"Solved at L{l}: +{p}.","escalated":"Good call: escalated to the next level, +{p}.","useless":"Needless escalation: you could have solved it. {p}.","outOfScope":"Out of your scope: the ticket is reopened and the Hydra grows.","late":"SLA missed: a follow-up is coming.","levelUp":"Level L{l} unlocked!","start":"Shift started. Good luck!"},"followUp":"Follow-up: {title}","overTime":"Time is up. {resolved} ticket(s) solved, {escalated} good escalation(s), {late} late. Level reached: L{level}. Score: {score}.","overHydra":"The Hydra wins: too many waiting tickets. {resolved} ticket(s) solved, level reached: L{level}. Score: {score}.","tickets":[[1,"Black screen at start-up","Workstation · hardware"],[1,"Password expired","Account"],[1,"Teams headset has no sound","Peripheral"],[1,"Set up a new starter’s laptop","Fleet"],[1,"Wireless mouse not responding","Peripheral"],[1,"Account locked after the holidays","Account"],[2,"Access to the project shared folder","Active Directory"],[2,"Shared mailbox missing in Outlook","Microsoft 365"],[2,"Missing Microsoft 365 licence","Microsoft 365"],[2,"Business app crashes on launch","Application"],[2,"Add to a security group","Active Directory"],[3,"File server almost full","Server"],[3,"Deployment script failing on 40 laptops","Automation"],[3,"Expired certificate on an internal server","Server"],[3,"PowerShell scheduled task failing","Automation"],[3,"Active Directory replication lagging","Server"]]}</script>
+<script type="module" src="../../../assets/js/demos/tickets.js"></script>
+</body>
+</html>
