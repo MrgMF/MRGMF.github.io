@@ -3,8 +3,16 @@
 
 import { i18n, store } from './util.js';
 
-const LADDER = i18n.ladder || [];
 const P = i18n.progress || {};
+
+// Les liens du parcours viennent des données de la page : on n'accepte que des
+// ancres internes (« #vs-lv », « #up-bac »), jamais une URL arbitraire.
+const safeHash = (h) => (typeof h === 'string' && /^#[a-z0-9-]+$/.test(h) ? h : '#select');
+const LADDER = (Array.isArray(i18n.ladder) ? i18n.ladder : []).map((s) => ({
+  id: String(s.id),
+  kind: s.kind === 'stage' ? 'stage' : 'upgrade',
+  href: safeHash(s.href),
+}));
 
 const read = (key) => new Set((store.get(key, '') || '').split(',').filter(Boolean));
 
@@ -30,7 +38,7 @@ export function obtain(id) {
 export function nextHref() {
   const done = doneSet();
   const step = LADDER.find((s) => !done.has(s.id));
-  return (step || LADDER[0])?.href || '#select';
+  return safeHash((step || LADDER[0])?.href);
 }
 
 export function render() {
@@ -50,7 +58,7 @@ export function render() {
   const btn = document.querySelector('[data-arcade]');
   if (btn && btn.firstChild) {
     const all = LADDER.length > 0 && done.size >= LADDER.length;
-    btn.href = all ? LADDER[0].href : nextHref();
+    btn.setAttribute('href', all ? safeHash(LADDER[0].href) : nextHref());
     btn.firstChild.textContent = `${all ? P.restart : done.size ? P.resume : P.start} `;
   }
 }

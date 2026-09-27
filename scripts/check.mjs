@@ -93,16 +93,17 @@ for (const page of PAGES) {
     const policy = cspMatch[1];
     if (policy.includes('unsafe-inline') || policy.includes('unsafe-eval')) fail(page, 'CSP trop permissive');
     if (html.indexOf('http-equiv="Content-Security-Policy"') > html.indexOf('<link')) fail(page, 'la CSP doit précéder les ressources');
-    for (const [, attrs, body] of html.matchAll(/<script([^>]*)>([\s\S]*?)<\/script>/g)) {
-      if (/\bsrc=/.test(attrs) || /type="application\/(ld\+)?json"/.test(attrs)) continue;
+    // Motif insensible à la casse, tolérant les espaces et attributs de fin de balise.
+    for (const [, attrs, body] of html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script\b[^>]*>/gi)) {
+      if (/\bsrc\s*=/i.test(attrs) || /type\s*=\s*"application\/(ld\+)?json"/i.test(attrs)) continue;
       const hash = `'sha256-${createHash('sha256').update(body, 'utf8').digest('base64')}'`;
       if (!policy.includes(hash)) fail(page, 'script inline non autorisé par la CSP');
     }
   }
   // Aucun style inline (bloqué par la CSP) ni gestionnaire d'événement inline.
-  if (/\sstyle="/.test(html)) fail(page, 'attribut style= présent (bloqué par la CSP)');
-  if (/<style[\s>]/.test(html)) fail(page, 'balise <style> présente (bloquée par la CSP)');
-  if (/\son[a-z]+="/.test(html)) fail(page, 'gestionnaire d’événement inline présent');
+  if (/\sstyle\s*=/i.test(html)) fail(page, 'attribut style= présent (bloqué par la CSP)');
+  if (/<style\b/i.test(html)) fail(page, 'balise <style> présente (bloquée par la CSP)');
+  if (/<[a-z][^>]*\son[a-z]+\s*=/i.test(html)) fail(page, 'gestionnaire d’événement inline présent');
 }
 
 // Les modules JS importés existent
