@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; manifest-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; upgrade-insecure-requests">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Book a room · Demo · MRGMF</title>
+<meta name="description" content="Hotel booking demo reusing the project’s Java object model: abstract Room class, polymorphic pricing, services and invoice.">
+<link rel="canonical" href="https://mrgmf.github.io/en/demos/hotel/">
+<link rel="alternate" hreflang="fr" href="https://mrgmf.github.io/demos/hotel/">
+<link rel="alternate" hreflang="en" href="https://mrgmf.github.io/en/demos/hotel/">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#07070f">
+<meta name="author" content="Fodié Marega">
+<link rel="icon" href="../../../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="../../../assets/fonts/chakra-petch-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../../../assets/css/demo.css">
+</head>
+<body class="demo-page demo-page--hotel">
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="demo-bar">
+  <a class="demo-back" href="../../#vs-hotel"><svg class="ico ico--left" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5 8 12l7 7"/></svg> Back to the portfolio</a>
+  <p class="demo-brand"><span class="demo-p1" aria-hidden="true">P1</span> MRGMF · Demo</p>
+  <a class="demo-lang" href="../../../demos/hotel/" hreflang="fr" lang="fr">FR</a>
+</header>
+<main class="demo" id="main" tabindex="-1">
+  <header class="demo-head">
+    <p class="demo-kicker">Demo · Hotel.java · object-oriented programming</p>
+    <h1>Book a room</h1>
+    <p class="demo-intro">The object model of the Hotel.java project, ported to JavaScript: search for a room, add services and watch the bill compute itself. Same classes, same prices, same rule against overbooking.</p>
+    <p class="demo-note"><svg class="ico ico--shield" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 19 6v5.5c0 4.2-2.9 7.6-7 9-4.1-1.4-7-4.8-7-9V6z"/><path d="m9 12 2.2 2.2L15.5 10"/></svg> Fictitious hotel, guests and bookings: everything stays in your browser.</p>
+  </header>
+  <p class="demo-nojs" data-nojs>This demo needs JavaScript to run. The rest of the portfolio stays readable without it.</p>
+  <div class="grid grid--side">
+    <div class="grid">
+      <section class="card" aria-labelledby="search-h">
+        <h2 id="search-h">Search</h2>
+        <div class="grid grid--2">
+          <div class="field"><label for="h-in">Check-in</label><input id="h-in" type="date" data-in></div>
+          <div class="field"><label for="h-out">Check-out</label><input id="h-out" type="date" data-out></div>
+          <div class="field"><label for="h-guests">Guests</label><select id="h-guests" data-guests><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select></div>
+          <div class="field"><label for="h-type">Room type</label><select id="h-type" data-type><option value="all">All types</option><option value="simple">Single room</option><option value="double">Double room</option><option value="suite">Suite</option></select></div>
+        </div>
+        <div class="field"><label for="h-budget">Maximum budget per night: <output data-budget-out for="h-budget"></output></label><input id="h-budget" type="range" min="50" max="200" step="10" value="200" data-budget></div>
+        <p class="status" data-nights role="status"></p>
+      </section>
+      <section class="card" aria-labelledby="rooms-h">
+        <h2 id="rooms-h">Rooms</h2>
+        <ul class="rooms" data-rooms></ul>
+      </section>
+    </div>
+    <div class="grid">
+      <section class="card" aria-labelledby="book-h">
+        <h2 id="book-h">Booking</h2>
+        <p data-selected class="hint">Pick a room from the list.</p>
+        <form data-book novalidate>
+          <div class="field"><label for="h-name">Guest</label><input id="h-name" type="text" autocomplete="off" value="Jean DUPONT"></div>
+          <div class="field"><label for="h-mail">Email</label><input id="h-mail" type="email" autocomplete="off" value="jean@test.com"></div>
+          <fieldset class="field">
+            <legend class="label">Services</legend>
+            <div data-services></div>
+          </fieldset>
+          <table class="invoice"><caption class="sr-only">Invoice</caption><tbody data-invoice></tbody><tfoot><tr><td>Total</td><td class="num" data-total>–</td></tr></tfoot></table>
+          <p class="actions"><button class="btn" type="submit" data-confirm disabled>Confirm the booking</button></p>
+          <p class="status" data-book-status role="status"></p>
+        </form>
+      </section>
+      <section class="card" aria-labelledby="list-h">
+        <h2 id="list-h">Bookings</h2>
+        <ul class="bookings" data-bookings><li class="hint">No booking yet.</li></ul>
+      </section>
+      <section class="card" aria-labelledby="model-h">
+        <h2 id="model-h">The Java model</h2>
+        <p class="hint">Room sets the contract, each type refines it. The demo calls the very same method, calculerPrix(nbNuits).</p>
+        <div class="uml" aria-label="Simplified class diagram">
+          <div class="uml-box uml-root"><b>«abstract» Chambre</b>numero · prixParNuit · capacite<br>+ getType() : String<br>+ calculerPrix(nbNuits) : double</div>
+          <div class="uml-box"><b>ChambreSimple</b>prixParNuit = 50 · capacite = 1</div>
+          <div class="uml-box"><b>ChambreDouble</b>prixParNuit = 80 · capacite = 2<br>litsJumeaux : boolean</div>
+          <div class="uml-box"><b>Suite</b>prixParNuit = 150 · capacite = 4<br>jacuzzi (+30) · balcon (+20)</div>
+        </div>
+        <pre class="code"><code>// Suite.java : la Suite surcharge le calcul (polymorphisme)
+@Override
+public double calculerPrix(int nbNuits) {
+    double prixTotalNuit = this.prixParNuit;
+    if (jacuzzi) prixTotalNuit += 30; // Supplément Jacuzzi
+    if (balcon)  prixTotalNuit += 20; // Supplément Balcon
+    return prixTotalNuit * nbNuits;
+}</code></pre>
+      </section>
+    </div>
+  </div>
+</main>
+<footer class="demo-foot">
+  <p>© 2026 Fodié Marega · <a href="../../#vs-hotel">Back to the portfolio</a> · <a href="https://github.com/MrgMF/MRGMF.github.io/tree/main/assets/js/demos" rel="noopener">Demo source code</a></p>
+</footer>
+<script type="application/json" id="demo-i18n">{"nights":"{n} night(s), from {from} to {to}.","badDates":"Check-out must come after check-in.","perNight":"{p} / night","stay":"{p} for {n} night(s)","capacity":"up to {n} guest(s)","busy":"Already booked on these dates","choose":"Choose","chosen":"Chosen","none":"No room matches: raise the budget or change the type.","selected":"Room {num} · {type} · {n} night(s)","roomLine":"Room {num}: {n} night(s) × {p}","serviceLine":"{name} ({desc})","types":{"simple":"Single room","double":"Double room","suite":"Suite"},"opts":{"twin":"Twin beds","king":"King bed","jacuzzi":"Jacuzzi","balcony":"Balcony"},"servicesList":[["Breakfast",15,"All-you-can-eat buffet"],["Spa",50,"1-hour access"]],"badEmail":"Invalid email address (same rule as Client.validerEmail()).","booked":"Booking #{id} saved: {total}.","overbooking":"Refused: room {num} is already booked on these dates.","status":{"active":"Active","cancelled":"Cancelled"},"cancel":"Cancel","bookingLine":"#{id} · {client} · room {num} · {from} – {to} · {total}"}</script>
+<script type="module" src="../../../assets/js/demos/hotel.js"></script>
+</body>
+</html>

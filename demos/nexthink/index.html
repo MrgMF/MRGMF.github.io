@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; manifest-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; upgrade-insecure-requests">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Console DEX · Démo · MRGMF</title>
+<meta name="description" content="Mini-console DEX façon Nexthink sur un parc fictif : requêtes NQL simplifiées, alertes, Remote Actions, campagne et score d’expérience numérique.">
+<link rel="canonical" href="https://mrgmf.github.io/demos/nexthink/">
+<link rel="alternate" hreflang="fr" href="https://mrgmf.github.io/demos/nexthink/">
+<link rel="alternate" hreflang="en" href="https://mrgmf.github.io/en/demos/nexthink/">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#07070f">
+<meta name="author" content="Fodié Marega">
+<link rel="icon" href="../../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="../../assets/fonts/chakra-petch-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../../assets/css/demo.css">
+</head>
+<body class="demo-page demo-page--nexthink">
+<a class="skip-link" href="#main">Aller au contenu</a>
+<header class="demo-bar">
+  <a class="demo-back" href="../../#vs-nexthink"><svg class="ico ico--left" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5 8 12l7 7"/></svg> Retour au portfolio</a>
+  <p class="demo-brand"><span class="demo-p1" aria-hidden="true">P1</span> MRGMF · Démo</p>
+  <a class="demo-lang" href="../../en/demos/nexthink/" hreflang="en" lang="en">EN</a>
+</header>
+<main class="demo" id="main" tabindex="-1">
+  <header class="demo-head">
+    <p class="demo-kicker">Démo · Expérience numérique · données fictives</p>
+    <h1>Console DEX</h1>
+    <p class="demo-intro">Une mini-console inspirée de Nexthink : interroge un parc fictif avec des requêtes NQL simplifiées, repère les postes qui dérivent, corrige-les à distance et regarde le score DEX remonter.</p>
+    <p class="demo-note"><svg class="ico ico--shield" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 19 6v5.5c0 4.2-2.9 7.6-7 9-4.1-1.4-7-4.8-7-9V6z"/><path d="m9 12 2.2 2.2L15.5 10"/></svg> Parc, postes et scores entièrement fictifs, générés dans ton navigateur. Démo indépendante, non affiliée à Nexthink.</p>
+  </header>
+  <p class="demo-nojs" data-nojs>Cette démo a besoin de JavaScript pour fonctionner. Le reste du portfolio reste lisible sans.</p>
+  <dl class="kpis" aria-label="Indicateurs du parc">
+    <div class="kpi"><dt>Score DEX moyen</dt><dd data-kpi="dex">…</dd></div>
+    <div class="kpi"><dt>Postes</dt><dd data-kpi="devices">…</dd></div>
+    <div class="kpi"><dt>Non conformes</dt><dd data-kpi="noncompliant">…</dd></div>
+    <div class="kpi"><dt>Alertes actives</dt><dd data-kpi="alerts">…</dd></div>
+  </dl>
+  <div class="grid grid--side">
+    <div class="grid">
+      <section class="card" aria-labelledby="nql-h">
+        <h2 id="nql-h">Requête NQL</h2>
+        <form class="query" data-query-form novalidate>
+          <label class="sr-only" for="nql">Requête</label>
+          <textarea id="nql" spellcheck="false" autocomplete="off" data-nql>devices | where disk_free_gb &lt; 10</textarea>
+          <button class="btn" type="submit"><svg class="ico ico--play" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 5v14l11-7z" fill="currentColor" stroke="none"/></svg> Exécuter</button>
+        </form>
+        <p class="hint">Syntaxe : devices | where champ opérateur valeur [and …] | sort champ asc|desc | limit n. Champs : name, os_build, disk_free_gb, crashes_7d, encrypted, compliant, dex_score.</p>
+        <div class="presets" role="group" aria-label="Requêtes prêtes">
+          <button type="button" data-preset="devices | where disk_free_gb &lt; 10">Disque presque plein</button>
+          <button type="button" data-preset="devices | where os_build != &quot;24H2&quot;">Windows pas à jour</button>
+          <button type="button" data-preset="devices | where crashes_7d &gt; 2 | sort crashes_7d desc">Plantages répétés</button>
+          <button type="button" data-preset="devices | where encrypted == false">Postes non chiffrés</button>
+          <button type="button" data-preset="devices | where compliant == false">Non conformes</button>
+          <button type="button" data-preset="devices | sort dex_score asc | limit 10">10 pires scores DEX</button>
+        </div>
+        <p class="status" data-query-status role="status"></p>
+      </section>
+      <section class="card" aria-labelledby="alerts-h">
+        <h2 id="alerts-h">Alertes</h2>
+        <ul class="alerts" data-alerts></ul>
+      </section>
+    </div>
+    <div class="grid">
+      <section class="card" aria-labelledby="res-h">
+        <h2 id="res-h">Résultats</h2>
+        <div class="table-wrap results-table" tabindex="0" role="region" aria-label="Tableau des postes (défilable)">
+          <table>
+            <thead><tr><th scope="col">Poste</th><th scope="col">Windows</th><th scope="col" class="num">Disque libre</th><th scope="col" class="num">Plantages 7 j</th><th scope="col">Chiffré</th><th scope="col" class="num">Score DEX</th></tr></thead>
+            <tbody data-rows></tbody>
+          </table>
+        </div>
+        <div class="results-bar">
+          <p class="hint" data-count></p>
+          <div class="actions">
+            <label class="sr-only" for="ra">Remote Action</label>
+            <select id="ra" data-remote><option value="cleanup">Remote Action : nettoyer le disque</option><option value="update">Remote Action : mettre à jour Windows</option><option value="repair">Remote Action : réparer l’application</option><option value="encrypt">Remote Action : activer le chiffrement</option></select>
+            <button class="btn btn--small" type="button" data-run-remote>Lancer</button>
+            <button class="btn btn--small btn--ghost" type="button" data-campaign>Campagne</button>
+          </div>
+        </div>
+      </section>
+      <section class="card" aria-labelledby="log-h">
+        <h2 id="log-h">Journal</h2>
+        <pre class="log" data-log tabindex="0" aria-live="polite"></pre>
+      </section>
+    </div>
+  </div>
+</main>
+<footer class="demo-foot">
+  <p>© 2026 Fodié Marega · <a href="../../#vs-nexthink">Retour au portfolio</a> · <a href="https://github.com/MrgMF/MRGMF.github.io/tree/main/assets/js/demos" rel="noopener">Code de la démo</a></p>
+</footer>
+<script type="application/json" id="demo-i18n">{"yes":"oui","no":"non","gb":"{n} Go","count":"{n} poste(s) correspondent à la requête.","none":"Aucun poste ne correspond : le parc est propre sur ce critère.","ran":"Requête exécutée : {n} résultat(s) en {ms} ms.","errors":{"start":"Une requête commence par « devices ».","stage":"Étape inconnue : « {x} ». Utilise where, sort ou limit.","field":"Champ inconnu : « {x} ».","op":"Opérateur inconnu : « {x} ». Utilise ==, !=, \u003c, \u003c=, > ou >=.","value":"Valeur invalide : « {x} ».","cond":"Condition incomplète : champ opérateur valeur.","limit":"La limite doit être un nombre entier positif."},"remoteNames":{"cleanup":"Nettoyer le disque","update":"Mettre à jour Windows","repair":"Réparer l’application","encrypt":"Activer le chiffrement"},"remoteEmpty":"Aucun poste dans les résultats : lance d’abord une requête.","remoteStart":"Remote Action « {name} » envoyée à {n} poste(s)…","remoteDone":"Remote Action « {name} » : {ok} succès, {skip} déjà conformes.","campaignStart":"Campagne envoyée à {n} utilisateur(s) concerné(s)…","campaignDone":"Campagne : {r} réponse(s) sur {n}, satisfaction moyenne {s}/5.","alerts":{"disk":"{n} poste(s) avec moins de 10 Go libres","os":"{n} poste(s) sans la dernière version de Windows","crash":"{n} poste(s) avec des plantages répétés","encrypt":"{n} poste(s) non chiffré(s)","clear":"Aucune alerte : tout est sous contrôle."},"investigate":"Investiguer"}</script>
+<script type="module" src="../../assets/js/demos/nexthink.js"></script>
+</body>
+</html>

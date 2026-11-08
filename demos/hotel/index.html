@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; manifest-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; upgrade-insecure-requests">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Réserver une chambre · Démo · MRGMF</title>
+<meta name="description" content="Démo de réservation d’hôtel qui reprend le modèle objet Java du projet : classe abstraite Chambre, polymorphisme des prix, services et facture.">
+<link rel="canonical" href="https://mrgmf.github.io/demos/hotel/">
+<link rel="alternate" hreflang="fr" href="https://mrgmf.github.io/demos/hotel/">
+<link rel="alternate" hreflang="en" href="https://mrgmf.github.io/en/demos/hotel/">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#07070f">
+<meta name="author" content="Fodié Marega">
+<link rel="icon" href="../../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="../../assets/fonts/chakra-petch-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../../assets/css/demo.css">
+</head>
+<body class="demo-page demo-page--hotel">
+<a class="skip-link" href="#main">Aller au contenu</a>
+<header class="demo-bar">
+  <a class="demo-back" href="../../#vs-hotel"><svg class="ico ico--left" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5 8 12l7 7"/></svg> Retour au portfolio</a>
+  <p class="demo-brand"><span class="demo-p1" aria-hidden="true">P1</span> MRGMF · Démo</p>
+  <a class="demo-lang" href="../../en/demos/hotel/" hreflang="en" lang="en">EN</a>
+</header>
+<main class="demo" id="main" tabindex="-1">
+  <header class="demo-head">
+    <p class="demo-kicker">Démo · Hotel.java · programmation orientée objet</p>
+    <h1>Réserver une chambre</h1>
+    <p class="demo-intro">Le modèle objet du projet Hotel.java, porté en JavaScript : cherche une chambre, ajoute des services et regarde la facture se calculer toute seule. Mêmes classes, mêmes prix, même règle contre l’overbooking.</p>
+    <p class="demo-note"><svg class="ico ico--shield" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 19 6v5.5c0 4.2-2.9 7.6-7 9-4.1-1.4-7-4.8-7-9V6z"/><path d="m9 12 2.2 2.2L15.5 10"/></svg> Hôtel, clients et réservations fictifs : tout reste dans ton navigateur.</p>
+  </header>
+  <p class="demo-nojs" data-nojs>Cette démo a besoin de JavaScript pour fonctionner. Le reste du portfolio reste lisible sans.</p>
+  <div class="grid grid--side">
+    <div class="grid">
+      <section class="card" aria-labelledby="search-h">
+        <h2 id="search-h">Recherche</h2>
+        <div class="grid grid--2">
+          <div class="field"><label for="h-in">Arrivée</label><input id="h-in" type="date" data-in></div>
+          <div class="field"><label for="h-out">Départ</label><input id="h-out" type="date" data-out></div>
+          <div class="field"><label for="h-guests">Voyageurs</label><select id="h-guests" data-guests><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select></div>
+          <div class="field"><label for="h-type">Type de chambre</label><select id="h-type" data-type><option value="all">Tous les types</option><option value="simple">Chambre simple</option><option value="double">Chambre double</option><option value="suite">Suite</option></select></div>
+        </div>
+        <div class="field"><label for="h-budget">Budget maximum par nuit : <output data-budget-out for="h-budget"></output></label><input id="h-budget" type="range" min="50" max="200" step="10" value="200" data-budget></div>
+        <p class="status" data-nights role="status"></p>
+      </section>
+      <section class="card" aria-labelledby="rooms-h">
+        <h2 id="rooms-h">Chambres</h2>
+        <ul class="rooms" data-rooms></ul>
+      </section>
+    </div>
+    <div class="grid">
+      <section class="card" aria-labelledby="book-h">
+        <h2 id="book-h">Réservation</h2>
+        <p data-selected class="hint">Choisis une chambre dans la liste.</p>
+        <form data-book novalidate>
+          <div class="field"><label for="h-name">Client</label><input id="h-name" type="text" autocomplete="off" value="Jean DUPONT"></div>
+          <div class="field"><label for="h-mail">E-mail</label><input id="h-mail" type="email" autocomplete="off" value="jean@test.com"></div>
+          <fieldset class="field">
+            <legend class="label">Services</legend>
+            <div data-services></div>
+          </fieldset>
+          <table class="invoice"><caption class="sr-only">Facture</caption><tbody data-invoice></tbody><tfoot><tr><td>Total</td><td class="num" data-total>–</td></tr></tfoot></table>
+          <p class="actions"><button class="btn" type="submit" data-confirm disabled>Confirmer la réservation</button></p>
+          <p class="status" data-book-status role="status"></p>
+        </form>
+      </section>
+      <section class="card" aria-labelledby="list-h">
+        <h2 id="list-h">Réservations</h2>
+        <ul class="bookings" data-bookings><li class="hint">Aucune réservation pour l’instant.</li></ul>
+      </section>
+      <section class="card" aria-labelledby="model-h">
+        <h2 id="model-h">Le modèle Java</h2>
+        <p class="hint">Chambre fixe le contrat, chaque type le précise. La démo appelle exactement la même méthode, calculerPrix(nbNuits).</p>
+        <div class="uml" aria-label="Diagramme de classes simplifié">
+          <div class="uml-box uml-root"><b>«abstract» Chambre</b>numero · prixParNuit · capacite<br>+ getType() : String<br>+ calculerPrix(nbNuits) : double</div>
+          <div class="uml-box"><b>ChambreSimple</b>prixParNuit = 50 · capacite = 1</div>
+          <div class="uml-box"><b>ChambreDouble</b>prixParNuit = 80 · capacite = 2<br>litsJumeaux : boolean</div>
+          <div class="uml-box"><b>Suite</b>prixParNuit = 150 · capacite = 4<br>jacuzzi (+30) · balcon (+20)</div>
+        </div>
+        <pre class="code"><code>// Suite.java : la Suite surcharge le calcul (polymorphisme)
+@Override
+public double calculerPrix(int nbNuits) {
+    double prixTotalNuit = this.prixParNuit;
+    if (jacuzzi) prixTotalNuit += 30; // Supplément Jacuzzi
+    if (balcon)  prixTotalNuit += 20; // Supplément Balcon
+    return prixTotalNuit * nbNuits;
+}</code></pre>
+      </section>
+    </div>
+  </div>
+</main>
+<footer class="demo-foot">
+  <p>© 2026 Fodié Marega · <a href="../../#vs-hotel">Retour au portfolio</a> · <a href="https://github.com/MrgMF/MRGMF.github.io/tree/main/assets/js/demos" rel="noopener">Code de la démo</a></p>
+</footer>
+<script type="application/json" id="demo-i18n">{"nights":"{n} nuit(s), du {from} au {to}.","badDates":"La date de départ doit suivre la date d’arrivée.","perNight":"{p} / nuit","stay":"{p} pour {n} nuit(s)","capacity":"{n} pers. max","busy":"Déjà réservée à ces dates","choose":"Choisir","chosen":"Choisie","none":"Aucune chambre ne correspond : élargis le budget ou change de type.","selected":"Chambre {num} · {type} · {n} nuit(s)","roomLine":"Chambre {num} : {n} nuit(s) × {p}","serviceLine":"{name} ({desc})","types":{"simple":"Chambre simple","double":"Chambre double","suite":"Suite"},"opts":{"twin":"Lits jumeaux","king":"Grand lit","jacuzzi":"Jacuzzi","balcony":"Balcon"},"servicesList":[["Petit-déjeuner",15,"Buffet à volonté"],["Spa",50,"Accès 1 h"]],"badEmail":"Adresse e-mail invalide (même règle que Client.validerEmail()).","booked":"Réservation n°{id} enregistrée : {total}.","overbooking":"Refusé : la chambre {num} est déjà réservée sur ces dates.","status":{"active":"En cours","cancelled":"Annulée"},"cancel":"Annuler","bookingLine":"n°{id} · {client} · chambre {num} · {from} – {to} · {total}"}</script>
+<script type="module" src="../../assets/js/demos/hotel.js"></script>
+</body>
+</html>

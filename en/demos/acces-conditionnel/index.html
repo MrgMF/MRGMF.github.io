@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; manifest-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; upgrade-insecure-requests">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Conditional Access simulator · Demo · MRGMF</title>
+<meta name="description" content="Interactive Conditional Access policy simulator: MFA, locations, compliant devices, sign-in risk, report-only mode and ring deployment.">
+<link rel="canonical" href="https://mrgmf.github.io/en/demos/acces-conditionnel/">
+<link rel="alternate" hreflang="fr" href="https://mrgmf.github.io/demos/acces-conditionnel/">
+<link rel="alternate" hreflang="en" href="https://mrgmf.github.io/en/demos/acces-conditionnel/">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#07070f">
+<meta name="author" content="Fodié Marega">
+<link rel="icon" href="../../../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="../../../assets/fonts/chakra-petch-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../../../assets/css/demo.css">
+</head>
+<body class="demo-page demo-page--acces-conditionnel">
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="demo-bar">
+  <a class="demo-back" href="../../#vs-lv"><svg class="ico ico--left" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5 8 12l7 7"/></svg> Back to the portfolio</a>
+  <p class="demo-brand"><span class="demo-p1" aria-hidden="true">P1</span> MRGMF · Demo</p>
+  <a class="demo-lang" href="../../../demos/acces-conditionnel/" hreflang="fr" lang="fr">FR</a>
+</header>
+<main class="demo" id="main" tabindex="-1">
+  <header class="demo-head">
+    <p class="demo-kicker">Demo · End User Architect · Microsoft Entra ID</p>
+    <h1>Conditional Access simulator</h1>
+    <p class="demo-intro">Pick a sign-in context, switch generic policies on or to report-only, and watch how access gets decided: granted, MFA required or blocked. The same reasoning as Microsoft Entra ID, on a small scale.</p>
+    <p class="demo-note"><svg class="ico ico--shield" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 19 6v5.5c0 4.2-2.9 7.6-7 9-4.1-1.4-7-4.8-7-9V6z"/><path d="m9 12 2.2 2.2L15.5 10"/></svg> Generic policies, not connected to any real tenant: nothing leaves your browser.</p>
+  </header>
+  <p class="demo-nojs" data-nojs>This demo needs JavaScript to run. The rest of the portfolio stays readable without it.</p>
+  <div class="grid grid--side">
+    <div class="grid">
+      <section class="card" aria-labelledby="ctx-h">
+        <h2 id="ctx-h">Sign-in context</h2>
+        <div class="field">
+        <label for="ca-user">User</label>
+        <select id="ca-user" data-ctx="user"><option value="member">Employee (member)</option><option value="guest" selected>External guest (B2B)</option><option value="admin">Administrator</option></select>
+      </div>
+        <div class="field">
+        <label for="ca-ring">User’s ring</label>
+        <select id="ca-ring" data-ctx="ring"><option value="0">Ring 0 · IT team</option><option value="1">Ring 1 · pilots</option><option value="2" selected>Ring 2 · everyone</option></select>
+      </div>
+        <div class="field">
+        <label for="ca-app">Application</label>
+        <select id="ca-app" data-ctx="app"><option value="teams" selected>Microsoft Teams</option><option value="sharepoint">SharePoint Online</option><option value="exchange">Exchange Online</option><option value="admin">Admin portal</option></select>
+      </div>
+        <div class="field">
+        <label for="ca-device">Device</label>
+        <select id="ca-device" data-ctx="device"><option value="compliant">Compliant (Intune managed)</option><option value="unmanaged" selected>Personal, unmanaged</option></select>
+      </div>
+        <div class="field">
+        <label for="ca-location">Location</label>
+        <select id="ca-location" data-ctx="location"><option value="trusted">Corporate network</option><option value="internet" selected>Internet</option><option value="blocked">Out-of-scope country</option></select>
+      </div>
+        <div class="field">
+        <label for="ca-risk">Sign-in risk</label>
+        <select id="ca-risk" data-ctx="risk"><option value="low" selected>Low</option><option value="medium">Medium</option><option value="high">High</option></select>
+      </div>
+      </section>
+      <section class="card" aria-labelledby="dec-h">
+        <h2 id="dec-h">Decision</h2>
+        <div class="verdict" data-verdict aria-live="polite"><span class="verdict-label">Access</span><span class="verdict-value" data-verdict-value></span><span class="hint" data-verdict-why></span></div>
+        <p class="actions"><button class="btn" type="button" data-signin>Try to sign in</button> <button class="btn btn--ghost" type="button" data-mfa hidden>Answer the MFA prompt</button></p>
+        <h3>Policy evaluation</h3>
+        <ol class="trace" data-trace></ol>
+      </section>
+    </div>
+    <div class="grid">
+      <section class="card" aria-labelledby="pol-h">
+        <h2 id="pol-h">Policies</h2>
+        <p class="hint">Report-only: the policy is evaluated and logged without blocking anything. Ring: how far the policy is rolled out (0 = IT team, 2 = everyone).</p>
+        <ul class="policies">
+        <li class="policy" data-policy="CA001">
+          <div class="policy-head"><h3 class="policy-name"><code>CA001</code> MFA for guests</h3></div>
+          <p class="policy-desc">External guests · all apps: require MFA.</p>
+          <div class="policy-ctrl">
+            <div class="seg" role="group" aria-label="CA001 · State" data-seg="state"><button type="button" data-value="on" aria-pressed="true">On</button><button type="button" data-value="report" aria-pressed="false">Report-only</button><button type="button" data-value="off" aria-pressed="false">Off</button></div>
+            <span>Ring</span>
+            <div class="seg" role="group" aria-label="CA001 · Ring" data-seg="ring"><button type="button" data-value="0" aria-pressed="false">0</button><button type="button" data-value="1" aria-pressed="false">1</button><button type="button" data-value="2" aria-pressed="true">2</button></div>
+          </div>
+        </li>
+        <li class="policy" data-policy="CA002">
+          <div class="policy-head"><h3 class="policy-name"><code>CA002</code> MFA for administrators</h3></div>
+          <p class="policy-desc">Admin roles · all apps: require MFA.</p>
+          <div class="policy-ctrl">
+            <div class="seg" role="group" aria-label="CA002 · State" data-seg="state"><button type="button" data-value="on" aria-pressed="true">On</button><button type="button" data-value="report" aria-pressed="false">Report-only</button><button type="button" data-value="off" aria-pressed="false">Off</button></div>
+            <span>Ring</span>
+            <div class="seg" role="group" aria-label="CA002 · Ring" data-seg="ring"><button type="button" data-value="0" aria-pressed="false">0</button><button type="button" data-value="1" aria-pressed="false">1</button><button type="button" data-value="2" aria-pressed="true">2</button></div>
+          </div>
+        </li>
+        <li class="policy" data-policy="CA003">
+          <div class="policy-head"><h3 class="policy-name"><code>CA003</code> Admin portals</h3></div>
+          <p class="policy-desc">All users · admin portals: MFA and compliant device.</p>
+          <div class="policy-ctrl">
+            <div class="seg" role="group" aria-label="CA003 · State" data-seg="state"><button type="button" data-value="on" aria-pressed="true">On</button><button type="button" data-value="report" aria-pressed="false">Report-only</button><button type="button" data-value="off" aria-pressed="false">Off</button></div>
+            <span>Ring</span>
+            <div class="seg" role="group" aria-label="CA003 · Ring" data-seg="ring"><button type="button" data-value="0" aria-pressed="false">0</button><button type="button" data-value="1" aria-pressed="false">1</button><button type="button" data-value="2" aria-pressed="true">2</button></div>
+          </div>
+        </li>
+        <li class="policy" data-policy="CA004">
+          <div class="policy-head"><h3 class="policy-name"><code>CA004</code> Out-of-scope countries</h3></div>
+          <p class="policy-desc">All users · out-of-scope locations: block.</p>
+          <div class="policy-ctrl">
+            <div class="seg" role="group" aria-label="CA004 · State" data-seg="state"><button type="button" data-value="on" aria-pressed="true">On</button><button type="button" data-value="report" aria-pressed="false">Report-only</button><button type="button" data-value="off" aria-pressed="false">Off</button></div>
+            <span>Ring</span>
+            <div class="seg" role="group" aria-label="CA004 · Ring" data-seg="ring"><button type="button" data-value="0" aria-pressed="false">0</button><button type="button" data-value="1" aria-pressed="false">1</button><button type="button" data-value="2" aria-pressed="true">2</button></div>
+          </div>
+        </li>
+        <li class="policy" data-policy="CA005">
+          <div class="policy-head"><h3 class="policy-name"><code>CA005</code> Mail on compliant devices</h3></div>
+          <p class="policy-desc">Members · Exchange Online: compliant device required. Piloting.</p>
+          <div class="policy-ctrl">
+            <div class="seg" role="group" aria-label="CA005 · State" data-seg="state"><button type="button" data-value="on" aria-pressed="false">On</button><button type="button" data-value="report" aria-pressed="true">Report-only</button><button type="button" data-value="off" aria-pressed="false">Off</button></div>
+            <span>Ring</span>
+            <div class="seg" role="group" aria-label="CA005 · Ring" data-seg="ring"><button type="button" data-value="0" aria-pressed="true">0</button><button type="button" data-value="1" aria-pressed="false">1</button><button type="button" data-value="2" aria-pressed="false">2</button></div>
+          </div>
+        </li>
+        <li class="policy" data-policy="CA006">
+          <div class="policy-head"><h3 class="policy-name"><code>CA006</code> Risky sign-ins</h3></div>
+          <p class="policy-desc">All users · medium or high risk: require MFA. Rolling out.</p>
+          <div class="policy-ctrl">
+            <div class="seg" role="group" aria-label="CA006 · State" data-seg="state"><button type="button" data-value="on" aria-pressed="true">On</button><button type="button" data-value="report" aria-pressed="false">Report-only</button><button type="button" data-value="off" aria-pressed="false">Off</button></div>
+            <span>Ring</span>
+            <div class="seg" role="group" aria-label="CA006 · Ring" data-seg="ring"><button type="button" data-value="0" aria-pressed="false">0</button><button type="button" data-value="1" aria-pressed="true">1</button><button type="button" data-value="2" aria-pressed="false">2</button></div>
+          </div>
+        </li>
+        </ul>
+      </section>
+      <section class="card" aria-labelledby="log-h">
+        <h2 id="log-h">Sign-in log</h2>
+        <p class="hint">Simplified format, inspired by Microsoft Entra sign-in logs.</p>
+        <pre class="log" data-log tabindex="0">No sign-in yet: click “Try to sign in”.</pre>
+      </section>
+    </div>
+  </div>
+</main>
+<footer class="demo-foot">
+  <p>© 2026 Fodié Marega · <a href="../../#vs-lv">Back to the portfolio</a> · <a href="https://github.com/MrgMF/MRGMF.github.io/tree/main/assets/js/demos" rel="noopener">Demo source code</a></p>
+</footer>
+<script type="application/json" id="demo-i18n">{"verdicts":{"grant":"Granted","grantMfa":"Granted after MFA","mfa":"MFA required","block":"Blocked","blockDevice":"Blocked"},"why":{"grant":"No active policy requires an extra control.","grantMfa":"MFA was satisfied, every condition is met.","mfa":"An active policy requires a second factor.","block":"An active policy blocks this sign-in.","blockDevice":"An active policy requires a compliant device."},"kinds":{"off":"Off","ring":"Out of ring","skip":"Not applied","report":"Report-only","block":"Blocks","device":"Device not compliant","mfa":"MFA required","ok":"Satisfied"},"ringWhy":"Rolled out up to ring {ring}, the user is in ring {user}.","offWhy":"The policy is not evaluated.","okWhy":"Conditions met: {what}.","blockWhy":"The policy blocks access from this context.","enforcedWhy":"Policy enforced, missing control: {what}.","needs":{"mfa":"MFA","device":"compliant device","block":"block"},"reportWould":"Would have required: {what}. Nothing is blocked in report-only.","reportPass":"Would have let it through. Nothing is enforced in report-only.","skip":{"CA001":"The user is not a guest.","CA002":"The user has no admin role.","CA003":"The app is not an admin portal.","CA004":"The location is in scope.","CA005":"Only targets members on Exchange Online.","CA006":"Sign-in risk is low."},"mfaDone":"MFA approved: the decision is re-evaluated.","logged":"Sign-in added to the log.","apps":{"teams":"Microsoft Teams","sharepoint":"SharePoint Online","exchange":"Exchange Online","admin":"Admin portal"}}</script>
+<script type="module" src="../../../assets/js/demos/acces-conditionnel.js"></script>
+</body>
+</html>

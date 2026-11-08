@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; manifest-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; upgrade-insecure-requests">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Connexion sécurisée LearnLink · Démo · MRGMF</title>
+<meta name="description" content="Démo interactive des mécanismes de sécurité de LearnLink : double authentification TOTP (RFC 6238), codes de secours, CAPTCHA adaptatif, verrouillage et journal SIEM.">
+<link rel="canonical" href="https://mrgmf.github.io/demos/learnlink/">
+<link rel="alternate" hreflang="fr" href="https://mrgmf.github.io/demos/learnlink/">
+<link rel="alternate" hreflang="en" href="https://mrgmf.github.io/en/demos/learnlink/">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#07070f">
+<meta name="author" content="Fodié Marega">
+<link rel="icon" href="../../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="../../assets/fonts/chakra-petch-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../../assets/css/demo.css">
+</head>
+<body class="demo-page demo-page--learnlink">
+<a class="skip-link" href="#main">Aller au contenu</a>
+<header class="demo-bar">
+  <a class="demo-back" href="../../#vs-learnlink"><svg class="ico ico--left" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5 8 12l7 7"/></svg> Retour au portfolio</a>
+  <p class="demo-brand"><span class="demo-p1" aria-hidden="true">P1</span> MRGMF · Démo</p>
+  <a class="demo-lang" href="../../en/demos/learnlink/" hreflang="en" lang="en">EN</a>
+</header>
+<main class="demo" id="main" tabindex="-1">
+  <header class="demo-head">
+    <p class="demo-kicker">Démo · LearnLink · MFA et anti brute-force</p>
+    <h1>Connexion sécurisée LearnLink</h1>
+    <p class="demo-intro">Les mécanismes de sécurité de LearnLink, recréés dans le navigateur : active la double authentification (TOTP, RFC 6238), connecte-toi, puis essaie de forcer le mot de passe pour voir le CAPTCHA, le verrouillage et le journal de sécurité réagir.</p>
+    <p class="demo-note"><svg class="ico ico--shield" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 19 6v5.5c0 4.2-2.9 7.6-7 9-4.1-1.4-7-4.8-7-9V6z"/><path d="m9 12 2.2 2.2L15.5 10"/></svg> Compte de démonstration fictif. Le secret TOTP est généré localement et disparaît quand tu fermes la page.</p>
+  </header>
+  <p class="demo-nojs" data-nojs>Cette démo a besoin de JavaScript pour fonctionner. Le reste du portfolio reste lisible sans.</p>
+  <div class="grid grid--2">
+    <div class="grid">
+      <section class="card" aria-labelledby="acc-h">
+        <h2 id="acc-h">1. Compte de démo</h2>
+        <p>Un compte étudiant fictif, pour jouer le rôle de l’attaquant comme de l’utilisateur.</p>
+        <dl class="creds">
+          <div><dt>Adresse e-mail</dt><dd><code>demo@learnlink.test</code></dd></div>
+          <div><dt>Mot de passe</dt><dd><code>Apprendre-2026</code></dd></div>
+        </dl>
+        <p class="hint">Le mot de passe n’est jamais stocké en clair. LearnLink utilise bcrypt (12 tours) côté serveur ; ici, le navigateur applique PBKDF2 (Web Crypto, 100 000 itérations) pour la même idée. Empreinte stockée :</p>
+        <code class="secret" data-hash>…</code>
+      </section>
+      <section class="card" aria-labelledby="mfa-h">
+        <h2 id="mfa-h">2. Double authentification</h2>
+        <p>Un second facteur par application (Google Authenticator, Authy…) : même avec le mot de passe, l’attaquant reste dehors.</p>
+        <p class="actions"><button class="btn" type="button" data-enable-mfa>Activer la MFA</button></p>
+        <div data-mfa-panel hidden>
+          <p class="hint">Clé secrète (à saisir dans une application d’authentification) :</p>
+          <code class="secret" data-secret></code>
+          <p class="hint">URI otpauth (normalement affichée en QR code) :</p>
+          <code class="secret" data-uri></code>
+          <h3>Authentificateur simulé</h3>
+          <div class="authenticator" aria-live="off">
+            <span class="auth-ring" data-ring aria-hidden="true"></span>
+            <div>
+              <div class="auth-code" data-code>––– –––</div>
+              <div class="auth-meta" data-remaining></div>
+            </div>
+          </div>
+          <h3>Codes de secours</h3>
+          <p class="hint">À usage unique, si le téléphone est perdu.</p>
+          <ul class="backup" data-backup></ul>
+        </div>
+      </section>
+    </div>
+    <div class="grid">
+      <section class="card" aria-labelledby="login-h">
+        <h2 id="login-h">3. Connexion</h2>
+        <form data-login novalidate>
+          <div class="field"><label for="ll-email">Adresse e-mail</label><input id="ll-email" type="email" autocomplete="off" value="demo@learnlink.test"></div>
+          <div class="field"><label for="ll-pass">Mot de passe</label><input id="ll-pass" type="password" autocomplete="off"></div>
+          <div class="field captcha" data-captcha hidden><label for="ll-captcha" data-captcha-q></label><input id="ll-captcha" type="text" inputmode="numeric" autocomplete="off"></div>
+          <div class="field" data-totp-field hidden><label for="ll-totp">Code à 6 chiffres (ou code de secours)</label><input id="ll-totp" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="9"></div>
+          <p class="actions"><button class="btn" type="submit" data-submit>Se connecter</button> <button class="btn btn--ghost" type="button" data-bruteforce>Simuler une attaque (5 essais)</button></p>
+        </form>
+        <p class="status" data-status role="status"></p>
+        <p class="meter-line" data-counters></p>
+        <div data-session hidden>
+          <p><strong data-welcome></strong></p>
+          <p class="actions"><button class="btn btn--ghost" type="button" data-logout>Se déconnecter</button></p>
+        </div>
+      </section>
+      <section class="card" aria-labelledby="siem-h">
+        <h2 id="siem-h">Journal de sécurité (SIEM)</h2>
+        <p class="hint">Chaque événement d’authentification, en JSON normalisé : prêt pour Prometheus, Grafana ou un SIEM.</p>
+        <pre class="log" data-log tabindex="0"></pre>
+        <p class="actions"><button class="btn btn--small btn--ghost" type="button" data-reset>Réinitialiser la démo</button></p>
+      </section>
+    </div>
+  </div>
+</main>
+<footer class="demo-foot">
+  <p>© 2026 Fodié Marega · <a href="../../#vs-learnlink">Retour au portfolio</a> · <a href="https://github.com/MrgMF/MRGMF.github.io/tree/main/assets/js/demos" rel="noopener">Code de la démo</a></p>
+</footer>
+<script type="application/json" id="demo-i18n">{"enabled":"MFA activée. Le code change toutes les 30 secondes.","remaining":"Expire dans {s} s","counters":"Échecs consécutifs : {n} · CAPTCHA dès 3 · verrouillage à 10 · alerte à 15","captchaQ":"Vérification : combien font {a} + {b} ?","ok":"Connexion réussie.","welcome":"Connecté : {email} · rôle Étudiant","loggedOut":"Déconnecté.","errors":{"credentials":"Identifiants incorrects.","captchaRequired":"Trop d’échecs : réponds d’abord à la vérification.","captchaFailed":"Vérification incorrecte.","totpRequired":"Saisis le code de ton application d’authentification.","totpBad":"Code invalide ou expiré.","totpReplay":"Ce code a déjà servi : attends le suivant.","locked":"Compte verrouillé pendant {s} s (15 min en production)."},"attack":"Attaque par force brute simulée : {n} mots de passe essayés.","alert":"Alerte de sécurité : 15 échecs sur ce compte. L’équipe sécurité est prévenue.","backupUsed":"Code de secours utilisé : il ne fonctionnera plus."}</script>
+<script type="module" src="../../assets/js/demos/learnlink.js"></script>
+</body>
+</html>

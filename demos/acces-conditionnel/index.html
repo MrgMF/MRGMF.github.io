@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; manifest-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; upgrade-insecure-requests">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Simulateur d’accès conditionnel · Démo · MRGMF</title>
+<meta name="description" content="Simulateur interactif de stratégies d’accès conditionnel : MFA, lieux, appareils conformes, risque de connexion, mode rapport seul et déploiement par anneaux.">
+<link rel="canonical" href="https://mrgmf.github.io/demos/acces-conditionnel/">
+<link rel="alternate" hreflang="fr" href="https://mrgmf.github.io/demos/acces-conditionnel/">
+<link rel="alternate" hreflang="en" href="https://mrgmf.github.io/en/demos/acces-conditionnel/">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#07070f">
+<meta name="author" content="Fodié Marega">
+<link rel="icon" href="../../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="../../assets/fonts/chakra-petch-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../../assets/css/demo.css">
+</head>
+<body class="demo-page demo-page--acces-conditionnel">
+<a class="skip-link" href="#main">Aller au contenu</a>
+<header class="demo-bar">
+  <a class="demo-back" href="../../#vs-lv"><svg class="ico ico--left" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5 8 12l7 7"/></svg> Retour au portfolio</a>
+  <p class="demo-brand"><span class="demo-p1" aria-hidden="true">P1</span> MRGMF · Démo</p>
+  <a class="demo-lang" href="../../en/demos/acces-conditionnel/" hreflang="en" lang="en">EN</a>
+</header>
+<main class="demo" id="main" tabindex="-1">
+  <header class="demo-head">
+    <p class="demo-kicker">Démo · End User Architect · Microsoft Entra ID</p>
+    <h1>Simulateur d’accès conditionnel</h1>
+    <p class="demo-intro">Choisis un contexte de connexion, active ou passe en rapport seul des stratégies génériques, et regarde comment l’accès se décide : accordé, MFA exigée ou bloqué. Le même raisonnement que dans Microsoft Entra ID, à petite échelle.</p>
+    <p class="demo-note"><svg class="ico ico--shield" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 19 6v5.5c0 4.2-2.9 7.6-7 9-4.1-1.4-7-4.8-7-9V6z"/><path d="m9 12 2.2 2.2L15.5 10"/></svg> Stratégies génériques, sans lien avec un vrai tenant : rien ne quitte ton navigateur.</p>
+  </header>
+  <p class="demo-nojs" data-nojs>Cette démo a besoin de JavaScript pour fonctionner. Le reste du portfolio reste lisible sans.</p>
+  <div class="grid grid--side">
+    <div class="grid">
+      <section class="card" aria-labelledby="ctx-h">
+        <h2 id="ctx-h">Contexte de connexion</h2>
+        <div class="field">
+        <label for="ca-user">Utilisateur</label>
+        <select id="ca-user" data-ctx="user"><option value="member">Collaborateur (membre)</option><option value="guest" selected>Invité externe (B2B)</option><option value="admin">Administrateur</option></select>
+      </div>
+        <div class="field">
+        <label for="ca-ring">Anneau de l’utilisateur</label>
+        <select id="ca-ring" data-ctx="ring"><option value="0">Anneau 0 · équipe IT</option><option value="1">Anneau 1 · pilotes</option><option value="2" selected>Anneau 2 · tout le monde</option></select>
+      </div>
+        <div class="field">
+        <label for="ca-app">Application</label>
+        <select id="ca-app" data-ctx="app"><option value="teams" selected>Microsoft Teams</option><option value="sharepoint">SharePoint Online</option><option value="exchange">Exchange Online</option><option value="admin">Portail d’administration</option></select>
+      </div>
+        <div class="field">
+        <label for="ca-device">Appareil</label>
+        <select id="ca-device" data-ctx="device"><option value="compliant">Conforme (géré par Intune)</option><option value="unmanaged" selected>Personnel, non géré</option></select>
+      </div>
+        <div class="field">
+        <label for="ca-location">Lieu</label>
+        <select id="ca-location" data-ctx="location"><option value="trusted">Réseau de l’entreprise</option><option value="internet" selected>Internet</option><option value="blocked">Pays hors périmètre</option></select>
+      </div>
+        <div class="field">
+        <label for="ca-risk">Risque de connexion</label>
+        <select id="ca-risk" data-ctx="risk"><option value="low" selected>Faible</option><option value="medium">Moyen</option><option value="high">Élevé</option></select>
+      </div>
+      </section>
+      <section class="card" aria-labelledby="dec-h">
+        <h2 id="dec-h">Décision</h2>
+        <div class="verdict" data-verdict aria-live="polite"><span class="verdict-label">Accès</span><span class="verdict-value" data-verdict-value></span><span class="hint" data-verdict-why></span></div>
+        <p class="actions"><button class="btn" type="button" data-signin>Tenter la connexion</button> <button class="btn btn--ghost" type="button" data-mfa hidden>Répondre à la MFA</button></p>
+        <h3>Évaluation des stratégies</h3>
+        <ol class="trace" data-trace></ol>
+      </section>
+    </div>
+    <div class="grid">
+      <section class="card" aria-labelledby="pol-h">
+        <h2 id="pol-h">Stratégies</h2>
+        <p class="hint">Mode rapport seul : la stratégie est évaluée et journalisée sans rien bloquer. Anneau : jusqu’où la stratégie est déployée (0 = équipe IT, 2 = tout le monde).</p>
+        <ul class="policies">
+        <li class="policy" data-policy="CA001">
+          <div class="policy-head"><h3 class="policy-name"><code>CA001</code> MFA pour les invités</h3></div>
+          <p class="policy-desc">Invités externes · toutes les applications : exiger la MFA.</p>
+          <div class="policy-ctrl">
+            <div class="seg" role="group" aria-label="CA001 · État" data-seg="state"><button type="button" data-value="on" aria-pressed="true">Activée</button><button type="button" data-value="report" aria-pressed="false">Rapport seul</button><button type="button" data-value="off" aria-pressed="false">Désactivée</button></div>
+            <span>Anneau</span>
+            <div class="seg" role="group" aria-label="CA001 · Anneau" data-seg="ring"><button type="button" data-value="0" aria-pressed="false">0</button><button type="button" data-value="1" aria-pressed="false">1</button><button type="button" data-value="2" aria-pressed="true">2</button></div>
+          </div>
+        </li>
+        <li class="policy" data-policy="CA002">
+          <div class="policy-head"><h3 class="policy-name"><code>CA002</code> MFA pour les administrateurs</h3></div>
+          <p class="policy-desc">Rôles d’administration · toutes les applications : exiger la MFA.</p>
+          <div class="policy-ctrl">
+            <div class="seg" role="group" aria-label="CA002 · État" data-seg="state"><button type="button" data-value="on" aria-pressed="true">Activée</button><button type="button" data-value="report" aria-pressed="false">Rapport seul</button><button type="button" data-value="off" aria-pressed="false">Désactivée</button></div>
+            <span>Anneau</span>
+            <div class="seg" role="group" aria-label="CA002 · Anneau" data-seg="ring"><button type="button" data-value="0" aria-pressed="false">0</button><button type="button" data-value="1" aria-pressed="false">1</button><button type="button" data-value="2" aria-pressed="true">2</button></div>
+          </div>
+        </li>
+        <li class="policy" data-policy="CA003">
+          <div class="policy-head"><h3 class="policy-name"><code>CA003</code> Portails d’administration</h3></div>
+          <p class="policy-desc">Tous les utilisateurs · portails d’administration : MFA et appareil conforme.</p>
+          <div class="policy-ctrl">
+            <div class="seg" role="group" aria-label="CA003 · État" data-seg="state"><button type="button" data-value="on" aria-pressed="true">Activée</button><button type="button" data-value="report" aria-pressed="false">Rapport seul</button><button type="button" data-value="off" aria-pressed="false">Désactivée</button></div>
+            <span>Anneau</span>
+            <div class="seg" role="group" aria-label="CA003 · Anneau" data-seg="ring"><button type="button" data-value="0" aria-pressed="false">0</button><button type="button" data-value="1" aria-pressed="false">1</button><button type="button" data-value="2" aria-pressed="true">2</button></div>
+          </div>
+        </li>
+        <li class="policy" data-policy="CA004">
+          <div class="policy-head"><h3 class="policy-name"><code>CA004</code> Pays hors périmètre</h3></div>
+          <p class="policy-desc">Tous les utilisateurs · lieux hors périmètre : bloquer.</p>
+          <div class="policy-ctrl">
+            <div class="seg" role="group" aria-label="CA004 · État" data-seg="state"><button type="button" data-value="on" aria-pressed="true">Activée</button><button type="button" data-value="report" aria-pressed="false">Rapport seul</button><button type="button" data-value="off" aria-pressed="false">Désactivée</button></div>
+            <span>Anneau</span>
+            <div class="seg" role="group" aria-label="CA004 · Anneau" data-seg="ring"><button type="button" data-value="0" aria-pressed="false">0</button><button type="button" data-value="1" aria-pressed="false">1</button><button type="button" data-value="2" aria-pressed="true">2</button></div>
+          </div>
+        </li>
+        <li class="policy" data-policy="CA005">
+          <div class="policy-head"><h3 class="policy-name"><code>CA005</code> Messagerie sur appareil conforme</h3></div>
+          <p class="policy-desc">Membres · Exchange Online : appareil conforme exigé. En pilote.</p>
+          <div class="policy-ctrl">
+            <div class="seg" role="group" aria-label="CA005 · État" data-seg="state"><button type="button" data-value="on" aria-pressed="false">Activée</button><button type="button" data-value="report" aria-pressed="true">Rapport seul</button><button type="button" data-value="off" aria-pressed="false">Désactivée</button></div>
+            <span>Anneau</span>
+            <div class="seg" role="group" aria-label="CA005 · Anneau" data-seg="ring"><button type="button" data-value="0" aria-pressed="true">0</button><button type="button" data-value="1" aria-pressed="false">1</button><button type="button" data-value="2" aria-pressed="false">2</button></div>
+          </div>
+        </li>
+        <li class="policy" data-policy="CA006">
+          <div class="policy-head"><h3 class="policy-name"><code>CA006</code> Connexion à risque</h3></div>
+          <p class="policy-desc">Tous les utilisateurs · risque moyen ou élevé : exiger la MFA. En cours de déploiement.</p>
+          <div class="policy-ctrl">
+            <div class="seg" role="group" aria-label="CA006 · État" data-seg="state"><button type="button" data-value="on" aria-pressed="true">Activée</button><button type="button" data-value="report" aria-pressed="false">Rapport seul</button><button type="button" data-value="off" aria-pressed="false">Désactivée</button></div>
+            <span>Anneau</span>
+            <div class="seg" role="group" aria-label="CA006 · Anneau" data-seg="ring"><button type="button" data-value="0" aria-pressed="false">0</button><button type="button" data-value="1" aria-pressed="true">1</button><button type="button" data-value="2" aria-pressed="false">2</button></div>
+          </div>
+        </li>
+        </ul>
+      </section>
+      <section class="card" aria-labelledby="log-h">
+        <h2 id="log-h">Journal des connexions</h2>
+        <p class="hint">Format simplifié, inspiré des journaux de connexion Microsoft Entra.</p>
+        <pre class="log" data-log tabindex="0">Aucune connexion pour l’instant : clique sur « Tenter la connexion ».</pre>
+      </section>
+    </div>
+  </div>
+</main>
+<footer class="demo-foot">
+  <p>© 2026 Fodié Marega · <a href="../../#vs-lv">Retour au portfolio</a> · <a href="https://github.com/MrgMF/MRGMF.github.io/tree/main/assets/js/demos" rel="noopener">Code de la démo</a></p>
+</footer>
+<script type="application/json" id="demo-i18n">{"verdicts":{"grant":"Accordé","grantMfa":"Accordé après MFA","mfa":"MFA exigée","block":"Bloqué","blockDevice":"Bloqué"},"why":{"grant":"Aucune stratégie active n’exige de contrôle supplémentaire.","grantMfa":"La MFA a été satisfaite, toutes les conditions sont remplies.","mfa":"Une stratégie active exige un second facteur.","block":"Une stratégie active bloque cette connexion.","blockDevice":"Une stratégie active exige un appareil conforme."},"kinds":{"off":"Désactivée","ring":"Hors anneau","skip":"Non concernée","report":"Rapport seul","block":"Bloque","device":"Appareil non conforme","mfa":"MFA exigée","ok":"Satisfaite"},"ringWhy":"Déployée jusqu’à l’anneau {ring}, l’utilisateur est dans l’anneau {user}.","offWhy":"La stratégie n’est pas évaluée.","okWhy":"Conditions remplies : {what}.","blockWhy":"La stratégie bloque l’accès depuis ce contexte.","enforcedWhy":"Stratégie appliquée, contrôle manquant : {what}.","needs":{"mfa":"MFA","device":"appareil conforme","block":"blocage"},"reportWould":"Aurait exigé : {what}. Rien n’est bloqué en rapport seul.","reportPass":"Aurait laissé passer. Rien n’est appliqué en rapport seul.","skip":{"CA001":"L’utilisateur n’est pas un invité.","CA002":"L’utilisateur n’a pas de rôle d’administration.","CA003":"L’application n’est pas un portail d’administration.","CA004":"Le lieu est dans le périmètre autorisé.","CA005":"Ne vise que les membres sur Exchange Online.","CA006":"Le risque de connexion est faible."},"mfaDone":"MFA validée : la décision est réévaluée.","logged":"Connexion ajoutée au journal.","apps":{"teams":"Microsoft Teams","sharepoint":"SharePoint Online","exchange":"Exchange Online","admin":"Admin portal"}}</script>
+<script type="module" src="../../assets/js/demos/acces-conditionnel.js"></script>
+</body>
+</html>
